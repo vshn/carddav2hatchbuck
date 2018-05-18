@@ -70,5 +70,6 @@ for file_name in files_list:
         parser = HatchbuckParser(args)
         parser.main()
     else:
-        print('File not compatible. Skipping: %s' % file_detail)
+        print('File not compatible. Skipping: %s'
+              % file_detail)
         continue
