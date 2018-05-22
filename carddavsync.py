@@ -183,7 +183,7 @@ class HatchbuckParser(object):
                         kind = "Home"
                     else:
                         kind = "Other"
-                except:
+                except KeyError:
                     # if there is no type at all
                     kind = "Other"
                 logging.debug(
@@ -203,7 +203,7 @@ class HatchbuckParser(object):
                         kind = "Home"
                     else:
                         kind = "Other"
-                except:
+                except KeyError:
                     # if there is no type at all
                     kind = "Other"
                 profile = self.hatchbuck.profile_add(profile, 'phones',
