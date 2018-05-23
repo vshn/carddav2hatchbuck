@@ -2,13 +2,13 @@
 """
 Hatchbuck parser. Run from command line or import as module.
 """
-from hatchbuck import Hatchbuck
 import argparse
 import os
 import pprint
 import logging
 import sys
 import vobject
+from hatchbuck import Hatchbuck
 
 
 class HatchbuckParser(object):

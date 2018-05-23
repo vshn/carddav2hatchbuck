@@ -6,13 +6,13 @@ synchronize the contacts with hatchbuck CRM
 It reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
-from carddavsync import HatchbuckArgs, HatchbuckParser
-from dotenv import load_dotenv
 import pathlib
 import time
 import os
 import sys
 import subprocess
+from dotenv import load_dotenv
+from carddavsync import HatchbuckArgs, HatchbuckParser
 
 load_dotenv()
 
@@ -64,8 +64,8 @@ for file_name in files_list:
     file_detail = file_name.split('_')
     if len(file_detail) == 4:
         print(file_detail)
-        args.tag = 'Adressbuch-'+file_detail[0]
-        args.user = file_detail[0]+'.'+file_detail[2]
+        args.tag = 'Adressbuch-' + file_detail[0]
+        args.user = file_detail[0] + '.' + file_detail[2]
         args.dir = ['carddav/{}/'.format(file_name)]
         parser = HatchbuckParser(args)
         parser.main()
