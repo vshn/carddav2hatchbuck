@@ -2,13 +2,13 @@
 """
 Hatchbuck parser. Run from command line or import as module.
 """
+from hatchbuck import Hatchbuck
 import argparse
 import os
 import pprint
 import logging
 import sys
 import vobject
-from hatchbuck import Hatchbuck
 
 
 class HatchbuckParser(object):
@@ -40,9 +40,8 @@ class HatchbuckParser(object):
         else:
             logging.basicConfig(level=logging.INFO, format=logformat)
             logging.getLogger(
-                'requests.packages.urllib3.connectionpool').setLevel(
-                logging.WARNING)
-
+                'requests.packages.urllib3.connectionpool').\
+                setLevel(logging.WARNING)
         logging.debug("starting with arguments: {0}".format(self.args))
 
     def init_hatchbuck(self):
@@ -183,7 +182,7 @@ class HatchbuckParser(object):
                         kind = "Home"
                     else:
                         kind = "Other"
-                except KeyError:
+                except AttributeError:
                     # if there is no type at all
                     kind = "Other"
                 logging.debug(
@@ -203,7 +202,7 @@ class HatchbuckParser(object):
                         kind = "Home"
                     else:
                         kind = "Other"
-                except KeyError:
+                except AttributeError:
                     # if there is no type at all
                     kind = "Other"
                 profile = self.hatchbuck.profile_add(profile, 'phones',
