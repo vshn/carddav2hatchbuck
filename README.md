@@ -2,6 +2,7 @@ carddav2hatchbuck
 =================
 
 .. image:: https://travis-ci.org/vshn/carddav2hatchbuck.svg?branch=master
+  
   :target: https://travis-ci.org/vshn/carddav2hatchbuck 
   
   
