@@ -1,11 +1,12 @@
 carddav2hatchbuck
 =================
 
-.. image:: https://travis-ci.org/vshn/carddav2hatchbuck.svg?branch=master
-  
-  :target: https://travis-ci.org/vshn/carddav2hatchbuck 
-  
-  
+|build-status|
+ 
+.. |build-status| image:: https://img.shields.io/travis/vshn/carddav2hatchbuck/master.svg
+   :alt: Build status
+   :target: https://travis-ci.org/vshn/carddav2hatchbuck
+   
 The carddavsync.py script searches the address book for contacts and compares it with contacts in a hatchback.
 If the contact is in a hatchback, do not create a contact, or if it does not exist,
 create a new contact with the same contact information in the address book.
