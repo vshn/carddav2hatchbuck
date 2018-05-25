@@ -2,13 +2,13 @@
 """
 Hatchbuck parser. Run from command line or import as module.
 """
-from hatchbuck import Hatchbuck
 import argparse
 import os
 import pprint
 import logging
 import sys
-import vobject
+import vobject  # pylint: disable=import-error
+from hatchbuck import Hatchbuck  # pylint: disable=import-error
 
 
 class HatchbuckParser(object):
@@ -40,9 +40,9 @@ class HatchbuckParser(object):
         else:
             logging.basicConfig(level=logging.INFO, format=logformat)
             logging.getLogger(
-                'requests.packages.urllib3.connectionpool').\
+                'requests.packages.urllib3.connectionpool'). \
                 setLevel(logging.WARNING)
-        logging.debug("starting with arguments: {0}".format(self.args))
+        logging.debug("starting with arguments: %s", (self.args))
 
     def init_hatchbuck(self):
         """Initialize hatchbuck API incl. authentication"""
@@ -57,45 +57,48 @@ class HatchbuckParser(object):
     def parse_files(self):
         """Start parsing files"""
         if self.args.file:
-            for f in self.args.file:
-                logging.debug("parsing file {0}".format(f))
-                self.parse_file(f)
+            for file in self.args.file:
+                logging.debug("parsing file %s", (file))
+                self.parse_file(file)
         elif self.args.dir:
-            for d in self.args.dir:
-                logging.debug("using directory {0}".format(d))
-                for f in os.listdir(d):
-                    if f.endswith(".vcf"):
-                        logging.debug("parsing file {0}".format(d + f))
-                        self.parse_file(d + f)
+            for direc in self.args.dir:
+                logging.debug("using directory %s", (direc))
+                for file in os.listdir(direc):
+                    if file.endswith(".vcf"):
+                        logging.debug("parsing file %s", (direc + file))
+                        self.parse_file(direc + file)
         else:
             print('Nothing to do.')
 
-    def parse_file(self, f):
+    def parse_file(self, file):
+        # pylint: disable=too-many-statements
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-branches
         """Parse a single address book file"""
-        pp = pprint.PrettyPrinter()
+        prin = pprint.PrettyPrinter()
         self.stats = {}
 
-        for v in vobject.readComponents(open(f)):
-            c = v.contents
-            if 'n' not in c:
+        for vob in vobject.readComponents(open(file)):
+            content = vob.contents
+            if 'n' not in content:
                 self.stats['noname'] = self.stats.get('noname', 0) + 1
                 return
-            if 'email' not in c:
+            if 'email' not in content:
                 self.stats['noemail'] = self.stats.get('noemail', 0) + 1
                 return
             self.stats['valid'] = self.stats.get('valid', 0) + 1
 
             # aggregate stats what kind of fields we have available
-            for i in c:
+            for i in content:
                 # if i in c:
                 self.stats[i] = self.stats.get(i, 0) + 1
 
             if self.args.verbose:
-                pp.pprint(c)
+                prin.pprint(content)
 
             emails = []
-            for e in c['email']:
-                emails.append(e.value)
+            for email in content['email']:
+                emails.append(email.value)
 
             profile = self.hatchbuck.search_email_multi(emails)
             if not profile:
@@ -105,12 +108,12 @@ class HatchbuckParser(object):
 
                 # create new contact
                 profile = dict()
-                profile['firstName'] = c['n'][0].value.given
-                profile['lastName'] = c['n'][0].value.family
-                if 'title' in c:
-                    profile['title'] = c['title'][0].value
-                if 'org' in c:
-                    profile['company'] = c['org'][0].value
+                profile['firstName'] = content['n'][0].value.given
+                profile['lastName'] = content['n'][0].value.family
+                if 'title' in content:
+                    profile['title'] = content['title'][0].value
+                if 'org' in content:
+                    profile['company'] = content['org'][0].value
 
                 profile['subscribed'] = True
                 profile['status'] = {'name': 'Lead'}
@@ -125,80 +128,81 @@ class HatchbuckParser(object):
                         'username': self.args.user}
 
                 profile['emails'] = []
-                for e in c.get('email', []):
-                    if 'WORK' in e.type_paramlist:
+                for email in content.get('email', []):
+                    if 'WORK' in email.type_paramlist:
                         kind = "Work"
-                    elif 'HOME' in e.type_paramlist:
+                    elif 'HOME' in email.type_paramlist:
                         kind = "Home"
                     else:
                         kind = "Other"
                     profile['emails'].append(
-                        {'address': e.value, 'type': kind})
+                        {'address': email.value, 'type': kind})
 
                 profile = self.hatchbuck.create(profile)
-                logging.info("added contact: {0}".format(profile))
+                logging.info("added contact: %s", (profile))
             else:
                 self.stats['found'] = self.stats.get('found', 0) + 1
 
             if profile.get('firstName', '') == '':
                 profile = self.hatchbuck.profile_add(profile, 'firstName',
                                                      None,
-                                                     c['n'][0].value.given)
+                                                     content['n'][0].
+                                                     value.given)
 
             if profile.get('lastName', '') == '':
                 profile = self.hatchbuck.profile_add(profile, 'lastName', None,
-                                                     c['n'][0].value.family)
+                                                     content['n'][0].
+                                                     value.family)
 
-            if 'title' in c and profile.get('title', '') == '':
+            if 'title' in content and profile.get('title', '') == '':
                 profile = self.hatchbuck.profile_add(profile, 'title', None,
-                                                     c['title'][0].value)
+                                                     content['title'][0].value)
 
-            if 'company' in c and profile.get('company', '') == '':
+            if 'company' in content and profile.get('company', '') == '':
                 profile = self.hatchbuck.profile_add(profile, 'company', None,
-                                                     c['org'][0].value)
+                                                     content['org'][0].value)
 
-            for e in c.get('email', []):
-                if 'WORK' in e.type_paramlist:
+            for email in content.get('email', []):
+                if 'WORK' in email.type_paramlist:
                     kind = "Work"
-                elif 'HOME' in e.type_paramlist:
+                elif 'HOME' in email.type_paramlist:
                     kind = "Home"
                 else:
                     kind = "Other"
                 profile = self.hatchbuck.profile_add(profile, 'emails',
                                                      'address',
-                                                     e.value, {'type': kind})
+                                                     email.value,
+                                                     {'type': kind})
 
-            for a in c.get('adr', []):
+            for addr in content.get('adr', []):
                 address = {
-                    'street': a.value.street,
-                    'zip_code': a.value.code,
-                    'city': a.value.city,
-                    'country': a.value.country,
+                    'street': addr.value.street,
+                    'zip_code': addr.value.code,
+                    'city': addr.value.city,
+                    'country': addr.value.country,
                 }
                 try:
-                    if 'WORK' in a.type_paramlist:
+                    if 'WORK' in addr.type_paramlist:
                         kind = "Work"
-                    elif 'HOME' in a.type_paramlist:
+                    elif 'HOME' in addr.type_paramlist:
                         kind = "Home"
                     else:
                         kind = "Other"
                 except AttributeError:
                     # if there is no type at all
                     kind = "Other"
-                logging.debug(
-                    "adding address {0} to {1}".format(address, profile))
+                logging.debug("adding address %s %s", address, profile)
                 profile = self.hatchbuck.profile_add_address(profile, address,
                                                              kind)
-
-            for t in c.get('tel', []):
-                number = t.value
-                for r in "()-":
+            for telefon in content.get('tel', []):
+                number = telefon.value
+                for rep in "()-":
                     # clean up number
-                    number = number.replace(r, '')
+                    number = number.replace(rep, '')
                 try:
-                    if 'WORK' in t.type_paramlist:
+                    if 'WORK' in telefon.type_paramlist:
                         kind = "Work"
-                    elif 'HOME' in t.type_paramlist:
+                    elif 'HOME' in telefon.type_paramlist:
                         kind = "Home"
                     else:
                         kind = "Other"
@@ -209,35 +213,37 @@ class HatchbuckParser(object):
                                                      'number',
                                                      number, {'type': kind})
 
-            for e in c.get('x-skype', []):
+            for email in content.get('x-skype', []):
                 profile = self.hatchbuck.profile_add(profile,
                                                      'instantMessaging',
-                                                     'address', e.value,
+                                                     'address', email.value,
                                                      {'type': 'Skype'})
 
-            for e in c.get('x-msn', []):
+            for email in content.get('x-msn', []):
                 profile = self.hatchbuck.profile_add(profile,
                                                      'instantMessaging',
-                                                     'address', e.value,
+                                                     'address', email.value,
                                                      {'type': 'Messenger'})
 
-            for e in c.get('x-msnim', []):
+            for email in content.get('x-msnim', []):
                 profile = self.hatchbuck.profile_add(profile,
                                                      'instantMessaging',
-                                                     'address', e.value,
+                                                     'address', email.value,
                                                      {'type': 'Messenger'})
 
-            for e in c.get('x-twitter', []):
-                if "twitter.com" in e.value:
-                    value = e.value
+            for email in content.get('x-twitter', []):
+                if "twitter.com" in email.value:
+                    value = email.value
                 else:
-                    value = "http://twitter.com/" + e.value.replace('@', '')
+                    value = "http://twitter.com/" + email.value. \
+                        replace('@', '')
                 profile = self.hatchbuck.profile_add(profile, 'socialNetworks',
                                                      'address', value,
                                                      {'type': 'Twitter'})
 
-            for e in c.get('url', []) + c.get('x-socialprofile', []):
-                value = e.value
+            for email in content.get('url', []) + content. \
+                    get('x-socialprofile', []):
+                value = email.value
                 if not value.startswith("http"):
                     value = "http://" + value
                 if "facebook.com" in value:
@@ -254,11 +260,11 @@ class HatchbuckParser(object):
                     profile = self.hatchbuck.profile_add(profile, 'website',
                                                          'websiteUrl', value)
 
-            for e in c.get('bday', []):
+            for email in content.get('bday', []):
                 date = {
-                    'year': e.value[0:4],
-                    'month': e.value[4:6],
-                    'day': e.value[6:8],
+                    'year': email.value[0:4],
+                    'month': email.value[4:6],
+                    'day': email.value[6:8],
                 }
                 profile = self.hatchbuck.profile_add_birthday(profile, date)
 
@@ -271,6 +277,7 @@ class HatchbuckParser(object):
 
 
 class HatchbuckArgs(object):
+    # pylint: disable=too-few-public-methods
     """
     Replacement for argparse command line arguments when used as module.
     """

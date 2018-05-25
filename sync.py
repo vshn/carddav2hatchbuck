@@ -6,30 +6,31 @@ synchronize the contacts with hatchbuck CRM
 It reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
-from carddavsync import HatchbuckArgs, HatchbuckParser
-from dotenv import load_dotenv
 import pathlib
 import time
 import os
 import sys
 import subprocess
+from dotenv import load_dotenv
+from carddavsync import HatchbuckArgs, HatchbuckParser
 
 load_dotenv()
 
-now = timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
-print('Starting carddav sync at %s ...' % now)
+NOW = time.strftime('%Y-%m-%d %H:%M:%S')
+print('Starting carddav sync at %s ...' % NOW)
 
-carddav_dir = pathlib.Path('carddav')
-carddav_dir.mkdir(parents=True, exist_ok=True)
+CARDDAV_DIR = pathlib.Path('carddav')
+CARDDAV_DIR.mkdir(parents=True, exist_ok=True)
 
 try:
-    url = os.environ['VDIRSYNC_URL']
-    username = os.environ['VDIRSYNC_USER']
-    password = os.environ['VDIRSYNC_PASS']
+    URL = os.environ['VDIRSYNC_URL']
+    USERNAME = os.environ['VDIRSYNC_USER']
+    PASSWORD = os.environ['VDIRSYNC_PASS']
 
-    args = HatchbuckArgs()
-    args.hatchbuck = os.environ['HATCHBUCK_KEY']
-    args.source = os.environ['HATCHBUCK_SOURCE']
+    ARGS = HatchbuckArgs()
+    ARGS.hatchbuck = os.environ['HATCHBUCK_KEY']
+    ARGS.source = os.environ['HATCHBUCK_SOURCE']
+
 except KeyError:
     print('Environment variables must be set:'
           ' VDIRSYNC_URL, VDIRSYNC_USER, VDIRSYNC_PASS')
@@ -37,13 +38,13 @@ except KeyError:
     sys.exit(1)
 
 with open('vdirsyncer.config.template', 'r') as template:
-    content = template.read()
-    content = content.replace('VDIRSYNC_URL', url)
-    content = content.replace('VDIRSYNC_USER', username)
-    content = content.replace('VDIRSYNC_PASS', password)
+    CONTENT = template.read()
+    CONTENT = CONTENT.replace('VDIRSYNC_URL', URL)
+    CONTENT = CONTENT.replace('VDIRSYNC_USER', USERNAME)
+    CONTENT = CONTENT.replace('VDIRSYNC_PASS', PASSWORD)
 
 with open('vdirsyncer.config', 'w') as config:
-    config.write(content)
+    config.write(CONTENT)
 
 subprocess.run("yes | vdirsyncer -c vdirsyncer.config discover",
                shell=True,
@@ -59,15 +60,14 @@ os.remove('vdirsyncer.config')
 
 print('Carddav sync done, starting carddavsync')
 
-files_list = os.listdir("./carddav")
-for file_name in files_list:
+FILES_LIST = os.listdir("./carddav")
+for file_name in FILES_LIST:
     file_detail = file_name.split('_')
     if len(file_detail) == 4:
-        print(file_detail)
-        args.tag = 'Adressbuch-'+file_detail[0]
-        args.user = file_detail[0]+'.'+file_detail[2]
-        args.dir = ['carddav/{}/'.format(file_name)]
-        parser = HatchbuckParser(args)
+        ARGS.tag = 'Adressbuch-' + file_detail[0]
+        ARGS.user = file_detail[0] + '.' + file_detail[2]
+        ARGS.dir = ['carddav/{}/'.format(file_name)]
+        parser = HatchbuckParser(ARGS)
         parser.main()
     else:
         print('File not compatible. Skipping: %s' % file_detail)
