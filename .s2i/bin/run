@@ -1,5 +1,3 @@
 #!/bin/bash
 python sync.py
-while [ 1 ] ; do
- sleep 1
-done
+sleep 3600
