@@ -1,18 +1,30 @@
+"""
+This script tests the script "carddavsync.py"
+"""
+import unittest
 from carddavsync import HatchbuckParser
 from carddavsync import HatchbuckArgs
-import unittest
 
 
 class TestCarddavsync(unittest.TestCase):
+    """
+    This class ....
+    """
 
     def setUp(self):
         pass
 
     def test_instantion(self):
-        carddavParser = HatchbuckParser('abc123')
-        self.assertTrue(isinstance(carddavParser, HatchbuckParser))
-        carddavArgs = HatchbuckParser('abc123')
-        self.assertFalse(isinstance(carddavArgs, HatchbuckArgs))
+        """
+        this ...
+        :return:
+        """
+        CARDDAV_PARSER = HatchbuckParser('abc123')
+        # pylint: disable = invalid-name
+        self.assertTrue(isinstance(CARDDAV_PARSER, HatchbuckParser))
+        CARDDAV_ARGS = HatchbuckParser('abc123')
+        # pylint: disable = invalid-name
+        self.assertFalse(isinstance(CARDDAV_ARGS, HatchbuckArgs))
 
 
 if __name__ == '__main__':
