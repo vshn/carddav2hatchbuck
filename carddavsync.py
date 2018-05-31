@@ -7,9 +7,9 @@ import os
 import pprint
 import logging
 import sys
+import re
 import vobject  # pylint: disable=import-error
 from hatchbuck import Hatchbuck  # pylint: disable=import-error
-import re
 
 
 class HatchbuckParser(object):
