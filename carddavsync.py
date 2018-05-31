@@ -9,7 +9,7 @@ import logging
 import sys
 import vobject  # pylint: disable=import-error
 from hatchbuck import Hatchbuck  # pylint: disable=import-error
-
+import re
 
 class HatchbuckParser(object):
     """
@@ -78,10 +78,13 @@ class HatchbuckParser(object):
 
         for vob in vobject.readComponents(open(file)):
             content = vob.contents
+            if self.args.verbose:
+                prin.pprint(content)
+
             if 'n' not in content:
                 self.stats['noname'] = self.stats.get('noname', 0) + 1
                 return
-            if 'email' not in content:
+            if 'email' not in content or not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value):
                 self.stats['noemail'] = self.stats.get('noemail', 0) + 1
                 return
             self.stats['valid'] = self.stats.get('valid', 0) + 1
@@ -91,12 +94,10 @@ class HatchbuckParser(object):
                 # if i in c:
                 self.stats[i] = self.stats.get(i, 0) + 1
 
-            if self.args.verbose:
-                prin.pprint(content)
-
             emails = []
             for email in content['email']:
-                emails.append(email.value)
+                if re.match(r"^[^@]+@[^@]+\.[^@]+$", email.value):
+                    emails.append(email.value)
 
             # search if there is already a contact with that email address
             profile = self.hatchbuck.search_email_multi(emails)
@@ -129,6 +130,8 @@ class HatchbuckParser(object):
 
                 profile['emails'] = []
                 for email in content.get('email', []):
+                    if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email.value):
+                        continue
                     if 'WORK' in email.type_paramlist:
                         kind = "Work"
                     elif 'HOME' in email.type_paramlist:
@@ -158,11 +161,13 @@ class HatchbuckParser(object):
                 profile = self.hatchbuck.profile_add(profile, 'title', None,
                                                      content['title'][0].value)
 
-            if 'company' in content and profile.get('company', '') == '':
+            if 'org' in content and profile.get('company', '') == '':
                 profile = self.hatchbuck.profile_add(profile, 'company', None,
                                                      content['org'][0].value)
 
             for email in content.get('email', []):
+                if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email.value):
+                    continue
                 if 'WORK' in email.type_paramlist:
                     kind = "Work"
                 elif 'HOME' in email.type_paramlist:
@@ -196,7 +201,7 @@ class HatchbuckParser(object):
                                                              kind)
             for telefon in content.get('tel', []):
                 number = telefon.value
-                for rep in "()-":
+                for rep in "()-\xa0":
                     # clean up number
                     number = number.replace(rep, '')
                 try:
@@ -263,8 +268,8 @@ class HatchbuckParser(object):
             for email in content.get('bday', []):
                 date = {
                     'year': email.value[0:4],
-                    'month': email.value[4:6],
-                    'day': email.value[6:8],
+                    'month': email.value[5:7],
+                    'day': email.value[8:10],
                 }
                 profile = self.hatchbuck.profile_add_birthday(profile, date)
 
