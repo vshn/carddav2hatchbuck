@@ -11,6 +11,7 @@ import vobject  # pylint: disable=import-error
 from hatchbuck import Hatchbuck  # pylint: disable=import-error
 import re
 
+
 class HatchbuckParser(object):
     """
     An object that does all the parsing for/with Hatchbuck.
@@ -84,7 +85,8 @@ class HatchbuckParser(object):
             if 'n' not in content:
                 self.stats['noname'] = self.stats.get('noname', 0) + 1
                 return
-            if 'email' not in content or not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value):
+            if 'email' not in content or \
+                    not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value):
                 self.stats['noemail'] = self.stats.get('noemail', 0) + 1
                 return
             self.stats['valid'] = self.stats.get('valid', 0) + 1
