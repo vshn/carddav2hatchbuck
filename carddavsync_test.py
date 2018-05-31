@@ -8,7 +8,7 @@ from carddavsync import HatchbuckArgs
 
 class TestCarddavsync(unittest.TestCase):
     """
-    This class ....
+    This class tests each of two instances, HatchbuckParser and HatchbuckArgs
     """
 
     def setUp(self):
@@ -22,9 +22,9 @@ class TestCarddavsync(unittest.TestCase):
         CARDDAV_PARSER = HatchbuckParser('abc123')
         # pylint: disable = invalid-name
         self.assertTrue(isinstance(CARDDAV_PARSER, HatchbuckParser))
-        CARDDAV_ARGS = HatchbuckParser('abc123')
+        CARDDAV_ARGS = HatchbuckArgs()
         # pylint: disable = invalid-name
-        self.assertFalse(isinstance(CARDDAV_ARGS, HatchbuckArgs))
+        self.assertTrue(isinstance(CARDDAV_ARGS, HatchbuckArgs))
 
 
 if __name__ == '__main__':
