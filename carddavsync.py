@@ -100,8 +100,10 @@ class HatchbuckParser(object):
             for email in content['email']:
                 emails.append(email.value)
 
+            # search if there is already a contact with that email address
             profile = self.hatchbuck.search_email_multi(emails)
             if not profile:
+                # none of the email addresses found in CRM yet
                 if self.args.update:
                     # skip this contact if its not in hatchbuck yet
                     continue
@@ -272,8 +274,6 @@ class HatchbuckParser(object):
                 if not self.hatchbuck.profile_contains(profile, 'tags', 'name',
                                                        self.args.tag):
                     self.hatchbuck.add_tag(profile['contactId'], self.args.tag)
-
-            self.hatchbuck.update(profile['contactId'], profile)
 
 
 class HatchbuckArgs(object):
