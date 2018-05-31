@@ -47,9 +47,7 @@ class HatchbuckParser(object):
     def init_hatchbuck(self):
         """Initialize hatchbuck API incl. authentication"""
         if not self.args.hatchbuck:
-            logging.error('No hatchbuck_key/hatchbuck_username found.'
-                          ' Please get the api key at'
-                          ' https://app.hatchbuck.com/Account/UpdateAPIKey')
+            logging.error('No hatchbuck_key found.')
             sys.exit(1)
 
         self.hatchbuck = Hatchbuck(self.args.hatchbuck, noop=self.args.noop)
