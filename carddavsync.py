@@ -85,8 +85,7 @@ class HatchbuckParser(object):
             if 'n' not in content:
                 self.stats['noname'] = self.stats.get('noname', 0) + 1
                 return
-            if 'email' not in content or \
-                    not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value): # pylint: disable=line-too-long
+            if 'email' not in content or not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value):  # pylint: disable=line-too-long
                 self.stats['noemail'] = self.stats.get('noemail', 0) + 1
                 return
             self.stats['valid'] = self.stats.get('valid', 0) + 1
