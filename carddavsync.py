@@ -97,7 +97,7 @@ class HatchbuckParser(object):
 
             emails = []
             for email in content['email']:
-                if re.match(r"^[^@]+@[^@]+\.[^@]+$", email.value):
+                if re.match(r"^[^@äöü]+@[^@]+\.[^@]+$", email.value):
                     emails.append(email.value)
 
             # search if there is already a contact with that email address
@@ -131,7 +131,7 @@ class HatchbuckParser(object):
 
                 profile['emails'] = []
                 for email in content.get('email', []):
-                    if not re.match(r"^[^@]+@[^@]+\.[^@]+$", email.value):
+                    if not re.match(r"^[^@äöü]+@[^@]+\.[^@]+$", email.value):
                         continue
                     if 'WORK' in email.type_paramlist:
                         kind = "Work"
