@@ -9,7 +9,7 @@ click-threading==0.1.2
 clint==0.5.1
 flake8==3.5.0
 freeze==1.0.10
-hatchbuck==1.0.7
+hatchbuck==1.0.8
 idna==2.6
 mccabe==0.6.1
 more-itertools==4.1.0
