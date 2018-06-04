@@ -1,14 +1,14 @@
 [general]
 # A folder where vdirsyncer can store some metadata about each pair.
-status_path = .vdirsyncer/status/
+status_path = carddav/.vdirsyncer/status/
 
 # CARDDAV
-[pair vshn]
+[pair carddav]
 # A `[pair <name>]` block defines two storages `a` and `b` that should be
 # synchronized. The definition of these storages follows in `[storage <name>]`
 # blocks. This is similar to accounts in OfflineIMAP.
-a = vshn_contacts_remote
-b = vshn_contacts_local
+a = contacts_remote
+b = contacts_local
 
 # Synchronize all collections that can be found.
 # You need to run `vdirsyncer discover` if new calendars/addressbooks are added
@@ -25,14 +25,14 @@ metadata = ["displayname"]
 #   `"b wins"` - assume b's items to be more up-to-date
 conflict_resolution = "a wins"
 
-[storage vshn_contacts_local]
+[storage contacts_local]
 # A storage references actual data on a remote server or on the local disk.
 # Similar to repositories in OfflineIMAP.
 type = filesystem
 path = carddav/
 fileext = .vcf
 
-[storage vshn_contacts_remote]
+[storage contacts_remote]
 type = carddav
 url = VDIRSYNC_URL
 username = VDIRSYNC_USER
