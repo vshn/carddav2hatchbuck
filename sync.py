@@ -30,6 +30,9 @@ try:
     ARGS = HatchbuckArgs()
     ARGS.hatchbuck = os.environ['HATCHBUCK_KEY']
     ARGS.source = os.environ['HATCHBUCK_SOURCE']
+    ARGS.verbose = True
+    ARGS.update = True
+    ARGS.noop = False
 
 except KeyError:
     print('Environment variables must be set:'
