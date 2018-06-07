@@ -30,7 +30,7 @@ try:
     ARGS = HatchbuckArgs()
     ARGS.hatchbuck = os.environ['HATCHBUCK_KEY']
     ARGS.source = os.environ['HATCHBUCK_SOURCE']
-    ARGS.verbose = True
+    ARGS.verbose = False
     ARGS.update = True
     ARGS.noop = False
 
