@@ -11,8 +11,17 @@ import time
 import os
 import sys
 import subprocess
+import argparse
 from dotenv import load_dotenv
 from carddavsync import HatchbuckArgs, HatchbuckParser
+
+parser = argparse.ArgumentParser(
+    description='sync carddav address books and synchonize each of them with hatchbuck')
+parser.add_argument('-n', '--noop',
+                    help='dont actually post anything to hatchbuck,'
+                         ' just log what would have been posted',
+                    action='store_true', default=False)
+args = parser.parse_args()
 
 load_dotenv()
 
@@ -32,7 +41,7 @@ try:
     ARGS.source = os.environ['HATCHBUCK_SOURCE']
     ARGS.verbose = False
     ARGS.update = True
-    ARGS.noop = False
+    ARGS.noop = args.noop
 
 except KeyError:
     print('Environment variables must be set:'
