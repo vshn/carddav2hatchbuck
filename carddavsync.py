@@ -13,6 +13,12 @@ from hatchbuck import Hatchbuck
 from pycountry import countries
 import phonenumbers
 
+# pylint: disable=logging-format-interpolation
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
+# pylint: disable=too-few-public-methods
+
 
 class HatchbuckParser(object):
     """
@@ -71,7 +77,8 @@ class HatchbuckParser(object):
         else:
             print('Nothing to do.')
 
-    def short_contact(self, profile):
+    @staticmethod
+    def short_contact(profile):
         """
         :param profile:
         :return:
@@ -273,8 +280,8 @@ class HatchbuckParser(object):
                     )
                 except phonenumbers.phonenumberutil.NumberParseException:
                     logging.warning("could not parse number %s in %s",
-                                    format(telefon.value,
-                                           self.short_contact(profile)))
+                                    telefon.value,
+                                    self.short_contact(profile))
                     pformatted = telefon.value
 
                     # try to guess the country from the addresses
@@ -311,9 +318,9 @@ class HatchbuckParser(object):
                         except phonenumbers.phonenumberutil. \
                                 NumberParseException:
                             logging.warning(
-                                "could not parse number %s in %s", format(
-                                    telefon.value,
-                                    self.short_contact(profile)))
+                                "could not parse number %s in %s",
+                                telefon.value,
+                                self.short_contact(profile))
                             pformatted = telefon.value
 
                     # check that there is not an international/longer
@@ -325,10 +332,8 @@ class HatchbuckParser(object):
                     for tel2 in profile['phones']:
                         # check for suffix match
                         if tel2['number'].replace(' ', '').endswith(num):
-                            logging.warning("not adding number %s in %s",
-                                            format(num,
-                                                   self.short_contact(
-                                                       profile)))  # noqa
+                            logging.warning("not adding number %s in %s", num,
+                                            self.short_contact(profile))
                             redundant = True
                             break
 
@@ -371,8 +376,7 @@ class HatchbuckParser(object):
                         if tel2['id'] != telefon['id'] and \
                                 tel2['number'].replace(' ', '').endswith(num):
                             logging.warning("redundant number %s in %s",
-                                            format(num, self.
-                                                   short_contact(profile)))
+                                            num, self.short_contact(profile))
                             redundant = True
                             break
                     if redundant:
