@@ -15,13 +15,14 @@ import argparse
 from dotenv import load_dotenv
 from carddavsync import HatchbuckArgs, HatchbuckParser
 
-parser = argparse.ArgumentParser(
-    description='sync carddav address books and synchonize each of them with hatchbuck')
-parser.add_argument('-n', '--noop',
+PARSER = argparse.ArgumentParser(
+    description='sync carddav address books and synchonize'
+                ' each of them with hatchbuck')
+PARSER.add_argument('-n', '--noop',
                     help='dont actually post anything to hatchbuck,'
                          ' just log what would have been posted',
                     action='store_true', default=False)
-args = parser.parse_args()
+ARG = PARSER.parse_args()
 
 load_dotenv()
 
@@ -41,7 +42,7 @@ try:
     ARGS.source = os.environ['HATCHBUCK_SOURCE']
     ARGS.verbose = False
     ARGS.update = True
-    ARGS.noop = args.noop
+    ARGS.noop = ARG.noop
 
 except KeyError:
     print('Environment variables must be set:'
@@ -79,8 +80,8 @@ for file_name in FILES_LIST:
         ARGS.tag = 'Adressbuch-' + file_detail[0]
         ARGS.user = file_detail[0] + '.' + file_detail[2]
         ARGS.dir = ['carddav/{}/'.format(file_name)]
-        parser = HatchbuckParser(ARGS)
-        parser.main()
+        PARSER = HatchbuckParser(ARGS)
+        PARSER.main()
     else:
         print('File not compatible. Skipping: %s' % file_detail)
         continue

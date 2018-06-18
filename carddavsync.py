@@ -8,10 +8,10 @@ import pprint
 import logging
 import sys
 import re
-import vobject  # pylint: disable=import-error
-from hatchbuck import Hatchbuck  # pylint: disable=import-error
-import phonenumbers
+import vobject
+from hatchbuck import Hatchbuck
 from pycountry import countries
+import phonenumbers
 
 
 class HatchbuckParser(object):
@@ -72,20 +72,25 @@ class HatchbuckParser(object):
             print('Nothing to do.')
 
     def short_contact(self, profile):
+        """
+        :param profile:
+        :return:
+        """
         text = "Contact("
         if profile.get('firstName', False) and profile.get('lastName', False):
             text = text + profile['firstName'] + " " + \
-                profile['lastName'] + ", "
+                   profile['lastName'] + ", "
         for email in profile.get('emails', []):
             text = text + email['address'] + ", "
         text = text[:-2] + ")"
         return text
 
     def parse_file(self, file):
-        # pylint: disable=too-many-statements
-        # pylint: disable=too-many-locals
-        # pylint: disable=too-many-branches
-        """Parse a single address book file"""
+        """
+        Parse a single address book file
+        :param file:
+        :return:
+        """
         prin = pprint.PrettyPrinter()
         self.stats = {}
 
@@ -97,7 +102,9 @@ class HatchbuckParser(object):
             if 'n' not in content:
                 self.stats['noname'] = self.stats.get('noname', 0) + 1
                 return
-            if 'email' not in content or not re.match(r"^[^@]+@[^@]+\.[^@]+$", content['email'][0].value):  # noqa pylint: disable=line-too-long
+            if 'email' not in content or not re.match(r"^[^@]+@[^@]+\.[^@]+$",
+                                                      content['email'][
+                                                          0].value):  # noqa pylint: disable=line-too-long
                 self.stats['noemail'] = self.stats.get('noemail', 0) + 1
                 return
             self.stats['valid'] = self.stats.get('valid', 0) + 1
@@ -186,11 +193,11 @@ class HatchbuckParser(object):
 
             # clean up company name
             if re.match(r";$", profile.get('company', '')):
-                logging.warning("found unclean company name: {0}".
+                logging.warning("found unclean company name: %s",
                                 format(profile['company']))
 
             if re.match(r"\|", profile.get('company', '')):
-                logging.warning("found unclean company name: {0}".
+                logging.warning("found unclean company name: %s",
                                 format(profile['company']))
 
             for email in content.get('email', []):
@@ -205,11 +212,12 @@ class HatchbuckParser(object):
                 lookup = self.hatchbuck.search_email(email.value)
                 if lookup is not None and \
                         lookup['contactId'] != profile['contactId']:
+                    # pylint: disable=logging-not-lazy
                     logging.warning(
-                        "email {0} from {1} already belongs to {2}".
-                        format(email.value,
-                               self.short_contact(profile),
-                               self.short_contact(lookup)))
+                        "email %s from %s already belongs to %s" % (
+                            email.value,
+                            self.short_contact(profile),
+                            self.short_contact(lookup)))
                 elif lookup is None:
                     profile = self.hatchbuck.profile_add(
                         profile,
@@ -264,7 +272,7 @@ class HatchbuckParser(object):
                         phonenumbers.PhoneNumberFormat.INTERNATIONAL
                     )
                 except phonenumbers.phonenumberutil.NumberParseException:
-                    logging.warning("could not parse number {0} in {1}".
+                    logging.warning("could not parse number %s in %s",
                                     format(telefon.value,
                                            self.short_contact(profile)))
                     pformatted = telefon.value
@@ -275,22 +283,22 @@ class HatchbuckParser(object):
                         if addr.get('country', False) and \
                                 addr['country'] not in countries_found:
                             countries_found.append(addr['country'])
-                    logging.debug("countries found {0}".
+                    logging.debug("countries found %s",
                                   format(countries_found))
                     if len(countries_found) == 1:
                         # lets try to parse the number with the country
                         countrycode = countries.lookup(
-                                countries_found[0]).alpha_2
-                        logging.debug("countrycode {0}".format(countrycode))
+                            countries_found[0]).alpha_2
+                        logging.debug("countrycode %s", format(countrycode))
                         try:
                             phonenumber = phonenumbers.parse(
-                                    telefon.value,
-                                    countrycode)
+                                telefon.value,
+                                countrycode)
                             pformatted = phonenumbers.format_number(
                                 phonenumber,
                                 phonenumbers.PhoneNumberFormat.INTERNATIONAL
                             )
-                            logging.debug("guess {0}".format(pformatted))
+                            logging.debug("guess %s", format(pformatted))
                             profile = self.hatchbuck.profile_add(
                                 profile,
                                 'phones',
@@ -300,12 +308,12 @@ class HatchbuckParser(object):
                             )
                             # if we got here we now have a full number
                             continue
-                        except phonenumbers.phonenumberutil.\
+                        except phonenumbers.phonenumberutil. \
                                 NumberParseException:
                             logging.warning(
-                                    "could not parse number {0} in {1}".
-                                    format(telefon.value,
-                                           self.short_contact(profile)))
+                                "could not parse number %s in %s", format(
+                                    telefon.value,
+                                    self.short_contact(profile)))
                             pformatted = telefon.value
 
                     # check that there is not an international/longer
@@ -317,9 +325,10 @@ class HatchbuckParser(object):
                     for tel2 in profile['phones']:
                         # check for suffix match
                         if tel2['number'].replace(' ', '').endswith(num):
-                            logging.warning("not adding number {0} in {1}".
+                            logging.warning("not adding number %s in %s",
                                             format(num,
-                                                   self.short_contact(profile)))  # noqa
+                                                   self.short_contact(
+                                                       profile)))  # noqa
                             redundant = True
                             break
 
@@ -333,7 +342,8 @@ class HatchbuckParser(object):
                         )
 
             for telefon in profile.get('phones', []):
-                # now go through all phone numbers in hatchbuck to clean them up
+                # now go through all phone numbers in hatchbuck
+                #  to clean them up
                 try:
                     phonenumber = phonenumbers.parse(telefon['number'], None)
                     pformatted = phonenumbers.format_number(
@@ -360,23 +370,19 @@ class HatchbuckParser(object):
                     for tel2 in profile['phones']:
                         if tel2['id'] != telefon['id'] and \
                                 tel2['number'].replace(' ', '').endswith(num):
-                            logging.warning("redundant number {0} in {1}".
-                                            format(num,
-                                                   self.short_contact(profile))
-                                            )
+                            logging.warning("redundant number %s in %s",
+                                            format(num, self.
+                                                   short_contact(profile)))
                             redundant = True
                             break
-
                     if redundant:
                         # delete this number
                         profile = self.hatchbuck.update(
-                                profile['contactId'],
-                                {'phones': [
-                                    {'number': '',
-                                     'id': telefon['id'],
-                                     'type': telefon['type'],
-                                     },
-                                ]})
+                            profile['contactId'],
+                            {'phones': [
+                                {'number': '',
+                                 'id': telefon['id'],
+                                 'type': telefon['type'], }, ]})
                     else:
                         # so this is an unique number but without country code
                         # try to guess the country from the postal addresses
@@ -385,38 +391,37 @@ class HatchbuckParser(object):
                             if addr.get('country', False) and \
                                     addr['country'] not in countries_found:
                                 countries_found.append(addr['country'])
-                        logging.debug("countries found {0}".
+                        logging.debug("countries found %s",
                                       format(countries_found))
                         if len(countries_found) == 1:
                             # lets try to parse the number with the country
                             countrycode = countries.lookup(
-                                    countries_found[0]).alpha_2
-                            logging.debug("countrycode {0}".format(countrycode))
+                                countries_found[0]).alpha_2
+                            logging.debug(
+                                "countrycode %s", format(countrycode))
                             try:
                                 phonenumber = phonenumbers.parse(
-                                        telefon.value,
-                                        countrycode)
+                                    telefon.value,
+                                    countrycode)
                                 pformatted = phonenumbers.format_number(
                                     phonenumber,
-                                    phonenumbers.PhoneNumberFormat.INTERNATIONAL
-                                )
-                                logging.debug("guess {0}".format(pformatted))
+                                    phonenumbers.PhoneNumberFormat
+                                    .INTERNATIONAL)
+                                logging.debug("guess %s", format(pformatted))
                                 profile = self.hatchbuck.update(
-                                        profile['contactId'],
-                                        {'phones': [
-                                            {'number': pformatted,
-                                             'id': telefon['id'],
-                                             'type': telefon['type'],
-                                             },
-                                        ]})
+                                    profile['contactId'],
+                                    {'phones': [
+                                        {'number': pformatted,
+                                         'id': telefon['id'],
+                                         'type': telefon['type'], }, ]})
                                 # if we got here we now have a full number
                                 continue
-                            except phonenumbers.phonenumberutil.\
+                            except phonenumbers.phonenumberutil. \
                                     NumberParseException:
                                 logging.warning(
-                                        "could not parse number {0} in {1}".
-                                        format(telefon.value,
-                                               self.short_contact(profile)))
+                                    "could not parse number {0} in {1}".format(
+                                        telefon.value,
+                                        self.short_contact(profile)))
 
             for email in content.get('x-skype', []):
                 profile = self.hatchbuck.profile_add(profile,
@@ -480,7 +485,6 @@ class HatchbuckParser(object):
 
 
 class HatchbuckArgs(object):
-    # pylint: disable=too-few-public-methods
     """
     Replacement for argparse command line arguments when used as module.
     """
