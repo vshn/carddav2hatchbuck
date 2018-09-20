@@ -14,6 +14,8 @@ import subprocess
 import argparse
 from dotenv import load_dotenv
 from carddavsync import HatchbuckArgs, HatchbuckParser
+# pylint: disable=import-error
+from rocketchat_API.rocketchat import RocketChat
 
 PARSER = argparse.ArgumentParser(
     description='sync carddav address books and synchonize'
@@ -85,3 +87,13 @@ for file_name in FILES_LIST:
     else:
         print('File not compatible. Skipping: %s' % file_detail)
         continue
+with open('contact.txt', 'r') as f:
+    F_READ = f.read()
+USER = os.environ.get('ROCKETCHAT_USER')
+PASS = os.environ.get('ROCKETCHAT_PASS')
+URL = os.environ.get('ROCKETCHAT_URL')
+ROCKET = RocketChat(USER, PASS, server_url=URL)
+ROCKET.chat_post_message(F_READ,
+                         channel='hatchbuck',
+                         alias='python').json()
+os.remove('contact.txt')
