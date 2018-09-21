@@ -15,7 +15,6 @@ import phonenumbers
 
 # pylint: disable=logging-format-interpolation
 # pylint: disable=too-many-locals
-# pylint: disable=useless-object-inheritance
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 # pylint: disable=too-few-public-methods

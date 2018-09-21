@@ -13,12 +13,9 @@ import sys
 import subprocess
 import argparse
 from dotenv import load_dotenv
-from rocketchat_API.rocketchat import RocketChat
 from carddavsync import HatchbuckArgs, HatchbuckParser
-
-
 # pylint: disable=import-error
-
+from rocketchat_API.rocketchat import RocketChat
 
 PARSER = argparse.ArgumentParser(
     description='sync carddav address books and synchonize'
