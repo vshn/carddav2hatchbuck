@@ -18,7 +18,6 @@ import phonenumbers
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 # pylint: disable=too-few-public-methods
-# pylint: disable=logging-not-lazy
 
 
 class HatchbuckParser(object):
@@ -220,20 +219,12 @@ class HatchbuckParser(object):
                 lookup = self.hatchbuck.search_email(email.value)
                 if lookup is not None and \
                         lookup['contactId'] != profile['contactId']:
-                    short_profile = dict()
-                    short_profile['firstName'] = lookup['firstName']
-                    short_profile['lastName'] = lookup['lastName']
-                    short_profile['emails'] = lookup['emails']
-                    short_profile['phones'] = lookup['phones']
-                    f_write = open('contact.txt', 'a')
-                    prof = str(short_profile)
-                    f_write.write(prof)
-                    f_write.write('\n\n')
-                # logging.warning(
-                #     "email %s from %s already belongs to %s" % (
-                #         email.value,
-                #         self.short_contact(profile),
-                #         self.short_contact(lookup)))
+                    # pylint: disable=logging-not-lazy
+                    logging.warning(
+                        "email %s from %s already belongs to %s" % (
+                            email.value,
+                            self.short_contact(profile),
+                            self.short_contact(lookup)))
                 elif lookup is None:
                     profile = self.hatchbuck.profile_add(
                         profile,
@@ -242,6 +233,7 @@ class HatchbuckParser(object):
                         email.value,
                         {'type': kind}
                     )
+
             for addr in content.get('adr', []):
                 address = {
                     'street': addr.value.street,
