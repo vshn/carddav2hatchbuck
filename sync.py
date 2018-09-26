@@ -6,6 +6,7 @@ synchronize the contacts with hatchbuck CRM
 It reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
+
 import pathlib
 import time
 import os
@@ -13,6 +14,7 @@ import sys
 import subprocess
 import argparse
 from dotenv import load_dotenv
+# pylint: disable=import-error
 from carddavsync import HatchbuckArgs, HatchbuckParser
 
 PARSER = argparse.ArgumentParser(
@@ -76,7 +78,7 @@ print('Carddav sync done, starting carddavsync')
 FILES_LIST = os.listdir("./carddav")
 for file_name in FILES_LIST:
     file_detail = file_name.split('_')
-    if len(file_detail) == 4:
+    if file_name == 'aarno_D_aukia_personal':
         ARGS.tag = 'Adressbuch-' + file_detail[0]
         ARGS.user = file_detail[0] + '.' + file_detail[2]
         ARGS.dir = ['carddav/{}/'.format(file_name)]

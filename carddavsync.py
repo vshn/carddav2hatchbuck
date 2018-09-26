@@ -9,15 +9,20 @@ import logging
 import sys
 import re
 import vobject
+from dotenv import load_dotenv
 from hatchbuck import Hatchbuck
 from pycountry import countries
 import phonenumbers
+# pylint: disable=import-error
+from rocketchat_API.rocketchat import RocketChat
+
 
 # pylint: disable=logging-format-interpolation
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 # pylint: disable=too-few-public-methods
+# pylint: disable=useless-object-inheritance
 
 
 class HatchbuckParser(object):
@@ -32,6 +37,7 @@ class HatchbuckParser(object):
 
     def main(self):
         """Parsing gets kicked off here"""
+        load_dotenv()
         self.init_logging()
         self.init_hatchbuck()
         self.parse_files()
@@ -219,12 +225,45 @@ class HatchbuckParser(object):
                 lookup = self.hatchbuck.search_email(email.value)
                 if lookup is not None and \
                         lookup['contactId'] != profile['contactId']:
+                    email_loookup = " "
+                    for email_add in lookup.get('emails', []):
+                        email_loookup = email_add['address'] + " "
+                    number_lookup = " "
+                    for phone_number in lookup.get('phones', []):
+                        number_lookup = phone_number['number'] + \
+                                        " "
+                    email_profile = " "
+                    for email_add in profile.get('emails', []):
+                        email_profile = email_add['address'] + " "
+                    number_profile = " "
+                    for phone_number in profile.get('phones', []):
+                        number_profile = phone_number['number'] + \
+                                         " "
+
+                    message = "{0} {1} ({2}, {3}, {4} ...)".format(
+                        lookup['firstName'], lookup['lastName'],
+                        email_loookup, number_lookup,
+                        lookup['contactUrl']) + " ist ein Duplikat von " \
+                                                "{0} {1} ({2}, {3}, {4} ...)"\
+                        .format(profile['firstName'], profile['lastName'],
+                                email_profile, number_profile,
+                                profile['contactUrl']) + " und sollte merged" \
+                                                         " werden "
+                    rocket_user = os.environ.get('ROCKETCHAT_USER')
+                    rocket_password = os.environ.get('ROCKETCHAT_PASS')
+                    url = os.environ.get('ROCKETCHAT_URL')
+                    rocket = RocketChat(rocket_user, rocket_password,
+                                        server_url=url)
+                    rocket.chat_post_message(message,
+                                             channel='hatchbuck',
+                                             alias='python').json()
+
                     # pylint: disable=logging-not-lazy
-                    logging.warning(
-                        "email %s from %s already belongs to %s" % (
-                            email.value,
-                            self.short_contact(profile),
-                            self.short_contact(lookup)))
+                    # logging.warning(
+                    #     "email %s from %s already belongs to %s" % (
+                    #         email.value,
+                    #         self.short_contact(profile),
+                    #         self.short_contact(lookup)))
                 elif lookup is None:
                     profile = self.hatchbuck.profile_add(
                         profile,
