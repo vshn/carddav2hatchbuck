@@ -78,7 +78,7 @@ print('Carddav sync done, starting carddavsync')
 FILES_LIST = os.listdir("./carddav")
 for file_name in FILES_LIST:
     file_detail = file_name.split('_')
-    if file_name == 'aarno_D_aukia_personal':
+    if len(file_detail) == 4:
         ARGS.tag = 'Adressbuch-' + file_detail[0]
         ARGS.user = file_detail[0] + '.' + file_detail[2]
         ARGS.dir = ['carddav/{}/'.format(file_name)]
