@@ -1,14 +1,14 @@
 """
-This script tests the script "carddavsync.py"
+Tests the module "carddavsync"
 """
 import unittest
-from carddavsync import HatchbuckParser
-from carddavsync import HatchbuckArgs
+from carddav2hatchbuck.carddavsync import HatchbuckParser
+from carddav2hatchbuck.carddavsync import HatchbuckArgs
 
 
 class TestCarddavsync(unittest.TestCase):
     """
-    This class tests each of two instances, HatchbuckParser and HatchbuckArgs
+    Tests each of two instances, HatchbuckParser and HatchbuckArgs
     """
 
     def setUp(self):

@@ -15,7 +15,7 @@ import subprocess
 import argparse
 from dotenv import load_dotenv
 # pylint: disable=import-error
-from carddavsync import HatchbuckArgs, HatchbuckParser
+from carddav2hatchbuck.carddavsync import HatchbuckArgs, HatchbuckParser
 
 PARSER = argparse.ArgumentParser(
     description='sync carddav address books and synchonize'
