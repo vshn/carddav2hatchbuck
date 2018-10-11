@@ -13,9 +13,9 @@ import vobject
 
 from hatchbuck import Hatchbuck
 from pycountry import countries
-from rocketchat_API.rocketchat import RocketChat
 
 from .cli import parse_arguments
+from .notifications import NotificationService
 
 
 class HatchbuckParser:
@@ -491,14 +491,8 @@ class HatchbuckParser:
 
             if len(profile_contactids) > 1:
                 # there are duplicates
-                rocket_user = os.environ.get('ROCKETCHAT_USER')
-                rocket_password = os.environ.get('ROCKETCHAT_PASS')
-                url = os.environ.get('ROCKETCHAT_URL')
-                rocket = RocketChat(rocket_user, rocket_password,
-                                    server_url=url)
-                rocket.chat_post_message('Duplikate: ' + message[:-2],
-                                         channel='hatchbuck',
-                                         alias='carddav2hatchbuck').json()
+                NotificationService().send_message(
+                    'Duplicates: %s' % message[:-2])
 
 
 def main():
