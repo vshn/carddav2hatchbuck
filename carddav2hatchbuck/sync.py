@@ -1,26 +1,19 @@
 #!/usr/bin/env python3
 """
-This script downloads address book(s) from CardDAV sources to
-synchronize the contacts with hatchbuck CRM
+Downloads address book(s) from CardDAV sources to synchronize the contacts
+with hatchbuck CRM
 
-It reads the CardDAV login credentials from environment variables
+Reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
-
-import pathlib
 import os
 import os.path
+import pathlib
 import subprocess
 import time
 
-from .carddavsync import HatchbuckParser, parse_arguments
-
-
-def run():
-    """Main entry point"""
-    args = parse_arguments()
-    args.update = True
-    run_carddav_sync(args)
+from .carddavsync import HatchbuckParser
+from .cli import parse_arguments
 
 
 def run_carddav_sync(args):
@@ -74,6 +67,13 @@ def run_carddav_sync(args):
             print('File naming scheme not compatible.'
                   ' Skipping: %s' % file_detail)
             continue
+
+
+def run():
+    """Main entry point"""
+    args = parse_arguments()
+    args.update = True
+    run_carddav_sync(args)
 
 
 if __name__ == "__main__":

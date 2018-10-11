@@ -2,25 +2,20 @@
 """
 Hatchbuck parser. Run from command line or import as module.
 """
-import argparse
+import logging
 import os
 import pprint
-import logging
-import sys
 import re
+import sys
+
+import phonenumbers
 import vobject
-from dotenv import load_dotenv
+
 from hatchbuck import Hatchbuck
 from pycountry import countries
-import phonenumbers
 from rocketchat_API.rocketchat import RocketChat
 
-
-# pylint: disable=logging-format-interpolation
-# pylint: disable=too-many-locals
-# pylint: disable=too-many-branches
-# pylint: disable=too-many-statements
-# pylint: disable=too-few-public-methods
+from .cli import parse_arguments
 
 
 class HatchbuckParser:
@@ -94,6 +89,9 @@ class HatchbuckParser:
 
         return 'Contact(%s)' % text[:-2]
 
+    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-statements
     def parse_file(self, file):
         """
         Parse a single address book file
@@ -335,8 +333,9 @@ class HatchbuckParser:
                             phonenumbers.PhoneNumberFormat.INTERNATIONAL
                         )
                         if telefon['number'] != pformatted:
-                            logging.warning("number from {0} to {1}".
-                                            format(telefon, pformatted))
+                            logging.warning("number from %s to %s",
+                                            telefon,
+                                            pformatted)
                             profile = self.hatchbuck.profile_add(
                                 profile,
                                 'phones',
@@ -346,9 +345,9 @@ class HatchbuckParser:
                             )
 
                     except phonenumbers.phonenumberutil.NumberParseException:
-                        logging.warning("could not parse number {0} in {1}".
-                                        format(telefon['number'],
-                                               self.short_contact(profile)))
+                        logging.warning("could not parse number %s in %s",
+                                        telefon['number'],
+                                        self.short_contact(profile))
                         num = telefon['number'].replace(' ', '')[1:]
                         redundant = False
                         for tel2 in profile['phones']:
@@ -393,18 +392,21 @@ class HatchbuckParser:
                                     logging.debug("guess %s", format(pformatted))
                                     profile = self.hatchbuck.update(
                                         profile['contactId'],
-                                        {'phones': [
-                                            {'number': pformatted,
-                                             'id': telefon['id'],
-                                             'type': telefon['type'], }, ]})
+                                        {
+                                            'phones': [
+                                                {
+                                                    'number': pformatted,
+                                                    'id': telefon['id'],
+                                                    'type': telefon['type'],
+                                                },
+                                            ],
+                                        })
                                     # if we got here we now have a full number
                                     continue
-                                except phonenumbers.phonenumberutil. \
-                                        NumberParseException:
-                                    logging.warning(
-                                        "could not parse number {0} in {1}".format(
-                                            telefon.value,
-                                            self.short_contact(profile)))
+                                except phonenumbers.phonenumberutil.NumberParseException:
+                                    logging.warning("could not parse number %s in %s",
+                                                    telefon.value,
+                                                    self.short_contact(profile))
 
                 for email in content.get('x-skype', []):
                     profile = self.hatchbuck.profile_add(profile,
@@ -497,74 +499,6 @@ class HatchbuckParser:
                 rocket.chat_post_message('Duplikate: ' + message[:-2],
                                          channel='hatchbuck',
                                          alias='carddav2hatchbuck').json()
-
-
-class HatchbuckArgs:
-    """
-    Replacement for argparse command line arguments when used as module.
-    """
-    verbose = True
-    update = True
-    noop = True
-
-    hatchbuck = None
-    source = None
-    dir = None
-    file = None
-
-    def __str__(self):
-        """Show the content of this class nicely when printed"""
-        return str(self.__dict__)
-
-
-def parse_arguments():
-    """Parse arguments from command line"""
-    load_dotenv(verbose=True)
-
-    key = os.environ.get('HATCHBUCK_KEY')
-    source = os.environ.get('HATCHBUCK_SOURCE')
-    vdirsync_user = os.environ.get('VDIRSYNC_USER')
-    vdirsync_pass = os.environ.get('VDIRSYNC_PASS')
-    vdirsync_url = os.environ.get('VDIRSYNC_URL')
-
-    parser = argparse.ArgumentParser(
-        description='parse vcard (.vcf) contact files',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--hatchbuck', type=str,
-                        help='Hatchbuck API key (env: HATCHBUCK_KEY)',
-                        default=key, required=not key)
-    parser.add_argument('-s', '--source', type=str,
-                        help='Hatchbuck contact source (env: HATCHBUCK_SOURCE)',
-                        default=source, required=not source)
-    parser.add_argument('--vdirsync-user', type=str,
-                        help='vdirsync user name (env: VDIRSYNC_USER)',
-                        default=vdirsync_user, required=not vdirsync_user)
-    parser.add_argument('--vdirsync-pass', type=str,
-                        help='vdirsync password (env: VDIRSYNC_PASS)',
-                        default=vdirsync_pass, required=not vdirsync_pass)
-    parser.add_argument('--vdirsync-url', type=str,
-                        help='vdirsync URL (env: VDIRSYNC_URL)',
-                        default=vdirsync_url, required=not vdirsync_url)
-    parser.add_argument('-t', '--tag', help='Hatchbuck contact tag')
-    parser.add_argument('--user', help='Hatchbuck sales rep username')
-    parser.add_argument('-v', '--verbose', help='output verbose debug logging',
-                        action='store_true', default=False)
-    parser.add_argument('-u', '--update',
-                        help='only update existing contacts in hatchbuck,'
-                             " don't add new ones",
-                        action='store_true', default=False)
-    parser.add_argument('-n', '--noop',
-                        help="don't actually post anything to hatchbuck,"
-                             ' just log what would have been posted',
-                        action='store_true', default=False)
-    parser.add_argument('-f', '--file', '--files',
-                        help='read a list of vcf files, ignore directories',
-                        nargs='*')
-    parser.add_argument('dir',
-                        help='read all vcf files from directories',
-                        nargs='*')
-    args = parser.parse_args()
-    return args
 
 
 def main():
