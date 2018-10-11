@@ -8,8 +8,9 @@ __pycache__/
 
 /.env
 
-/.vdirsyncer/
 /.pytest_cache/
 /.tox/
 
 /carddav/
+/.vdirsyncer/
+/vdirsyncer.config

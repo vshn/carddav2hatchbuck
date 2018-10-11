@@ -7,15 +7,15 @@ It reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
 
-import pathlib
-import time
-import os
-import sys
-import subprocess
 import argparse
+import pathlib
+import os
+import subprocess
+import sys
+import time
 from dotenv import load_dotenv
-# pylint: disable=import-error
-from carddav2hatchbuck.carddavsync import HatchbuckArgs, HatchbuckParser
+
+from .carddavsync import HatchbuckArgs, HatchbuckParser
 
 PARSER = argparse.ArgumentParser(
     description='sync carddav address books and synchonize'
@@ -52,15 +52,19 @@ except KeyError:
     print('Aborting.')
     sys.exit(1)
 
-with open('vdirsyncer.config.template', 'r') as template:
+sync_template = 'vdirsyncer.config.template'
+sync_config = 'vdirsyncer.config'
+
+with open(sync_template, 'r') as template:
     CONTENT = template.read()
     CONTENT = CONTENT.replace('VDIRSYNC_URL', URL)
     CONTENT = CONTENT.replace('VDIRSYNC_USER', USERNAME)
     CONTENT = CONTENT.replace('VDIRSYNC_PASS', PASSWORD)
 
-with open('vdirsyncer.config', 'w') as config:
+with open(sync_config, 'w') as config:
     config.write(CONTENT)
 
+# TODO: use Python module calls for this
 subprocess.run("yes | vdirsyncer -c vdirsyncer.config discover",
                shell=True,
                check=True,
@@ -71,14 +75,14 @@ subprocess.run("vdirsyncer -c vdirsyncer.config sync",
                check=True,
                stdout=subprocess.PIPE)
 
-os.remove('vdirsyncer.config')
+os.remove(sync_config)
 
 print('Carddav sync done, starting carddavsync')
 
-FILES_LIST = os.listdir("./carddav")
+FILES_LIST = os.listdir(CARDDAV_DIR.name)
 for file_name in FILES_LIST:
     file_detail = file_name.split('_')
-    if file_name == 'aarno_D_aukia_personal':
+    if len(file_detail) == 4:
         ARGS.tag = 'Adressbuch-' + file_detail[0]
         ARGS.user = file_detail[0] + '.' + file_detail[2]
         ARGS.dir = ['carddav/{}/'.format(file_name)]

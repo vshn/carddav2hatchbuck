@@ -180,11 +180,11 @@ class HatchbuckParser:
                                                          content['n'][0].
                                                          value.given)
 
-                # if profile['lastName'] == '':
-                #     profile = self.hatchbuck.profile_add(profile, 'lastName',
-                #                                          None,
-                #                                          content['n'][0].
-                #                                          value.family)
+                if profile['lastName'] == '':
+                    profile = self.hatchbuck.profile_add(profile, 'lastName',
+                                                         None,
+                                                         content['n'][0].
+                                                         value.family)
 
                 if 'title' in content and profile['title'] == '':
                     profile = self.hatchbuck.profile_add(profile, 'title',
