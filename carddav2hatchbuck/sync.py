@@ -10,84 +10,41 @@ VDIRSYNC_USER and VDIRSYNC_PASS
 import argparse
 import pathlib
 import os
+import os.path
 import subprocess
 import sys
 import time
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
-from .carddavsync import HatchbuckArgs, HatchbuckParser
+from .carddavsync import HatchbuckArgs, HatchbuckParser, parse_arguments
 
 
 def run():
     """Main entry point"""
-    args = parse_commandline_args()
-    config = get_configuration(args)
-    run_carddav_sync(**config)
+    args = parse_arguments()
+    args.update = True
+    run_carddav_sync(args)
 
 
-def parse_commandline_args():
-    """Evaluate the command line"""
-    parser = argparse.ArgumentParser(
-        description='sync carddav address books and synchonize'
-                    ' each of them with hatchbuck')
-    parser.add_argument('-n', '--noop',
-                        help='dont actually post anything to hatchbuck,'
-                             ' just log what would have been posted',
-                        action='store_true', default=False)
-
-    args = parser.parse_args()
-    return args
-
-
-def get_configuration(commandline_args):
-    """Collect configuration data from environment"""
-    load_dotenv()
-
+def run_carddav_sync(args):
+    """Fetch contacts from CardDAV source and sync with Hatchbuck"""
     now = time.strftime('%Y-%m-%d %H:%M:%S')
     print('Starting carddav sync at %s ...' % now)
 
     carddav_dir = pathlib.Path('carddav')
     carddav_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
-        url = os.environ['VDIRSYNC_URL']
-        username = os.environ['VDIRSYNC_USER']
-        password = os.environ['VDIRSYNC_PASS']
-
-        args = HatchbuckArgs()
-        args.hatchbuck = os.environ['HATCHBUCK_KEY']
-        args.source = os.environ['HATCHBUCK_SOURCE']
-        args.verbose = False
-        args.update = True
-        args.noop = commandline_args.noop
-
-    except KeyError:
-        print('Environment variables must be set:'
-              ' VDIRSYNC_URL, VDIRSYNC_USER, VDIRSYNC_PASS')
-        print('Aborting.')
-        sys.exit(1)
-
-    config = dict(args=args,
-                  carddav_dir=carddav_dir,
-                  url=url,
-                  username=username,
-                  password=password)
-    return config
-
-
-def run_carddav_sync(**config):
-    """Fetch contacts from CardDAV source and sync with Hatchbuck"""
     sync_template = 'vdirsyncer.config.template'
     sync_config = 'vdirsyncer.config'
 
     with open(sync_template, 'r') as template:
         content = template.read()
-        content = content.replace('VDIRSYNC_URL', config['url'])
-        content = content.replace('VDIRSYNC_USER', config['username'])
-        content = content.replace('VDIRSYNC_PASS', config['password'])
+        content = content.replace('VDIRSYNC_URL', args.vdirsync_url)
+        content = content.replace('VDIRSYNC_USER', args.vdirsync_user)
+        content = content.replace('VDIRSYNC_PASS', args.vdirsync_pass)
 
-    with open(sync_config, 'w') as config:
-        config.write(content)
+    with open(sync_config, 'w') as config_file:
+        config_file.write(content)
 
     # NOTE: This should be done with Python module calls
     # see https://github.com/pimutils/vdirsyncer/issues/770
@@ -105,19 +62,20 @@ def run_carddav_sync(**config):
 
     print('CardDAV sync done, starting carddavsync')
 
-    args, carddav_dir = config['args'], config['carddav_dir']
     files_list = os.listdir(carddav_dir.name)
 
     for file_name in files_list:
         file_detail = file_name.split('_')
         if len(file_detail) == 4:
-            args.tag = 'Adressbuch-' + file_detail[0]
-            args.user = file_detail[0] + '.' + file_detail[2]
-            args.dir = ['carddav/{}/'.format(file_name)]
+            firstname, _, lastname, _ = file_detail
+            args.tag = 'Adressbuch-%s' % firstname
+            args.user = '%s.%s' % (firstname, lastname)
+            args.dir = [os.path.join('carddav', file_name)]
             parser = HatchbuckParser(args)
             parser.main()
         else:
-            print('File not compatible. Skipping: %s' % file_detail)
+            print('File naming scheme not compatible.'
+                  ' Skipping: %s' % file_detail)
             continue
 
 
