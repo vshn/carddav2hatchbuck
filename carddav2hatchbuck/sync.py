@@ -17,77 +17,108 @@ from dotenv import load_dotenv
 
 from .carddavsync import HatchbuckArgs, HatchbuckParser
 
-PARSER = argparse.ArgumentParser(
-    description='sync carddav address books and synchonize'
-                ' each of them with hatchbuck')
-PARSER.add_argument('-n', '--noop',
-                    help='dont actually post anything to hatchbuck,'
-                         ' just log what would have been posted',
-                    action='store_true', default=False)
-ARG = PARSER.parse_args()
 
-load_dotenv()
+def run():
+    """Main entry point"""
+    args = parse_commandline_args()
+    config = get_configuration(args)
+    run_carddav_sync(**config)
 
-NOW = time.strftime('%Y-%m-%d %H:%M:%S')
-print('Starting carddav sync at %s ...' % NOW)
 
-CARDDAV_DIR = pathlib.Path('carddav')
-CARDDAV_DIR.mkdir(parents=True, exist_ok=True)
+def parse_commandline_args():
+    """Evaluate the command line"""
+    parser = argparse.ArgumentParser(
+        description='sync carddav address books and synchonize'
+                    ' each of them with hatchbuck')
+    parser.add_argument('-n', '--noop',
+                        help='dont actually post anything to hatchbuck,'
+                             ' just log what would have been posted',
+                        action='store_true', default=False)
 
-try:
-    URL = os.environ['VDIRSYNC_URL']
-    USERNAME = os.environ['VDIRSYNC_USER']
-    PASSWORD = os.environ['VDIRSYNC_PASS']
+    args = parser.parse_args()
+    return args
 
-    ARGS = HatchbuckArgs()
-    ARGS.hatchbuck = os.environ['HATCHBUCK_KEY']
-    ARGS.source = os.environ['HATCHBUCK_SOURCE']
-    ARGS.verbose = False
-    ARGS.update = True
-    ARGS.noop = ARG.noop
 
-except KeyError:
-    print('Environment variables must be set:'
-          ' VDIRSYNC_URL, VDIRSYNC_USER, VDIRSYNC_PASS')
-    print('Aborting.')
-    sys.exit(1)
+def get_configuration(commandline_args):
+    """Collect configuration data from environment"""
+    load_dotenv()
 
-sync_template = 'vdirsyncer.config.template'
-sync_config = 'vdirsyncer.config'
+    now = time.strftime('%Y-%m-%d %H:%M:%S')
+    print('Starting carddav sync at %s ...' % now)
 
-with open(sync_template, 'r') as template:
-    CONTENT = template.read()
-    CONTENT = CONTENT.replace('VDIRSYNC_URL', URL)
-    CONTENT = CONTENT.replace('VDIRSYNC_USER', USERNAME)
-    CONTENT = CONTENT.replace('VDIRSYNC_PASS', PASSWORD)
+    carddav_dir = pathlib.Path('carddav')
+    carddav_dir.mkdir(parents=True, exist_ok=True)
 
-with open(sync_config, 'w') as config:
-    config.write(CONTENT)
+    try:
+        url = os.environ['VDIRSYNC_URL']
+        username = os.environ['VDIRSYNC_USER']
+        password = os.environ['VDIRSYNC_PASS']
 
-# TODO: use Python module calls for this
-subprocess.run("yes | vdirsyncer -c vdirsyncer.config discover",
-               shell=True,
-               check=True,
-               stdout=subprocess.PIPE)
+        args = HatchbuckArgs()
+        args.hatchbuck = os.environ['HATCHBUCK_KEY']
+        args.source = os.environ['HATCHBUCK_SOURCE']
+        args.verbose = False
+        args.update = True
+        args.noop = commandline_args.noop
 
-subprocess.run("vdirsyncer -c vdirsyncer.config sync",
-               shell=True,
-               check=True,
-               stdout=subprocess.PIPE)
+    except KeyError:
+        print('Environment variables must be set:'
+              ' VDIRSYNC_URL, VDIRSYNC_USER, VDIRSYNC_PASS')
+        print('Aborting.')
+        sys.exit(1)
 
-os.remove(sync_config)
+    config = dict(args=args,
+                  carddav_dir=carddav_dir,
+                  url=url,
+                  username=username,
+                  password=password)
+    return config
 
-print('Carddav sync done, starting carddavsync')
 
-FILES_LIST = os.listdir(CARDDAV_DIR.name)
-for file_name in FILES_LIST:
-    file_detail = file_name.split('_')
-    if len(file_detail) == 4:
-        ARGS.tag = 'Adressbuch-' + file_detail[0]
-        ARGS.user = file_detail[0] + '.' + file_detail[2]
-        ARGS.dir = ['carddav/{}/'.format(file_name)]
-        PARSER = HatchbuckParser(ARGS)
-        PARSER.main()
-    else:
-        print('File not compatible. Skipping: %s' % file_detail)
-        continue
+def run_carddav_sync(**config):
+    """Fetch contacts from CardDAV source and sync with Hatchbuck"""
+    sync_template = 'vdirsyncer.config.template'
+    sync_config = 'vdirsyncer.config'
+
+    with open(sync_template, 'r') as template:
+        content = template.read()
+        content = content.replace('VDIRSYNC_URL', config['url'])
+        content = content.replace('VDIRSYNC_USER', config['username'])
+        content = content.replace('VDIRSYNC_PASS', config['password'])
+
+    with open(sync_config, 'w') as config:
+        config.write(content)
+
+    # TODO: use Python module calls for this
+    subprocess.run("yes | vdirsyncer -c vdirsyncer.config discover",
+                   shell=True,
+                   check=True,
+                   stdout=subprocess.PIPE)
+
+    subprocess.run("vdirsyncer -c vdirsyncer.config sync",
+                   shell=True,
+                   check=True,
+                   stdout=subprocess.PIPE)
+
+    os.remove(sync_config)
+
+    print('CardDAV sync done, starting carddavsync')
+
+    args, carddav_dir = config['args'], config['carddav_dir']
+    files_list = os.listdir(carddav_dir.name)
+
+    for file_name in files_list:
+        file_detail = file_name.split('_')
+        if len(file_detail) == 4:
+            args.tag = 'Adressbuch-' + file_detail[0]
+            args.user = file_detail[0] + '.' + file_detail[2]
+            args.dir = ['carddav/{}/'.format(file_name)]
+            parser = HatchbuckParser(args)
+            parser.main()
+        else:
+            print('File not compatible. Skipping: %s' % file_detail)
+            continue
+
+
+if __name__ == "__main__":
+    run()
