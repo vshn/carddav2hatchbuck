@@ -7,16 +7,13 @@ It reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
 
-import argparse
 import pathlib
 import os
 import os.path
 import subprocess
-import sys
 import time
-from dotenv import find_dotenv, load_dotenv
 
-from .carddavsync import HatchbuckArgs, HatchbuckParser, parse_arguments
+from .carddavsync import HatchbuckParser, parse_arguments
 
 
 def run():
