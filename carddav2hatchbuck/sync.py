@@ -89,7 +89,8 @@ def run_carddav_sync(**config):
     with open(sync_config, 'w') as config:
         config.write(content)
 
-    # TODO: use Python module calls for this
+    # NOTE: This should be done with Python module calls
+    # see https://github.com/pimutils/vdirsyncer/issues/770
     subprocess.run("yes | vdirsyncer -c vdirsyncer.config discover",
                    shell=True,
                    check=True,
