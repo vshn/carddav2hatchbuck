@@ -2,8 +2,11 @@
 Notification to pro-actively features for un
 """
 import os
+import logging
 
 from rocketchat_API.rocketchat import RocketChat
+
+from .logger import logging
 
 
 # pylint: disable=too-few-public-methods
@@ -14,6 +17,7 @@ class NotificationService:
 
     def __init__(self):
         """A RocketChat channel"""
+        self.log = logging
         self.user = os.environ.get('ROCKETCHAT_USER')
         self.password = os.environ.get('ROCKETCHAT_PASS')
         self.url = os.environ.get('ROCKETCHAT_URL')
@@ -26,7 +30,7 @@ class NotificationService:
 
     def send_message(self, message):
         """Send a message to the RocketChat channel"""
-        self.service.chat_post_message(message,
-                                       channel=self.channel,
-                                       alias=self.alias
-                                       ).json()
+        response = self.service.chat_post_message(
+            message, channel=self.channel, alias=self.alias)
+
+        self.log.debug(response.json())
