@@ -26,8 +26,8 @@ def test_instantion():
     """
     Tests each of two instances, HatchbuckParser and HatchbuckArgs
     """
-    parser = HatchbuckParser('abc123')
-    assert isinstance(parser, HatchbuckParser)
-
     args = HatchbuckArgsMock()
     assert isinstance(args, HatchbuckArgsMock)
+
+    parser = HatchbuckParser(args)
+    assert isinstance(parser, HatchbuckParser)
