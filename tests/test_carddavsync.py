@@ -1,31 +1,33 @@
 """
-Tests the module "carddavsync"
+Tests for module "carddavsync"
 """
-import unittest
 from carddav2hatchbuck.carddavsync import HatchbuckParser
-from carddav2hatchbuck.carddavsync import HatchbuckArgs
 
 
-class TestCarddavsync(unittest.TestCase):
+class HatchbuckArgsMock:  # pylint: disable=too-few-public-methods
+    """
+    Replacement for argparse command line arguments when used as module.
+    """
+    verbose = True
+    update = True
+    noop = True
+
+    hatchbuck = None
+    source = None
+    dir = None
+    file = None
+
+    def __str__(self):
+        """Show the content of this class nicely when printed"""
+        return str(self.__dict__)
+
+
+def test_instantion():
     """
     Tests each of two instances, HatchbuckParser and HatchbuckArgs
     """
+    args = HatchbuckArgsMock()
+    assert isinstance(args, HatchbuckArgsMock)
 
-    def setUp(self):
-        pass
-
-    def test_instantion(self):
-        """
-        this ...
-        :return:
-        """
-        CARDDAV_PARSER = HatchbuckParser('abc123')
-        # pylint: disable = invalid-name
-        self.assertTrue(isinstance(CARDDAV_PARSER, HatchbuckParser))
-        CARDDAV_ARGS = HatchbuckArgs()
-        # pylint: disable = invalid-name
-        self.assertTrue(isinstance(CARDDAV_ARGS, HatchbuckArgs))
-
-
-if __name__ == '__main__':
-    unittest.main()
+    parser = HatchbuckParser(args)
+    assert isinstance(parser, HatchbuckParser)
