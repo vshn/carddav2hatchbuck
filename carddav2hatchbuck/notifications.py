@@ -21,8 +21,8 @@ class NotificationService:
         self.service = RocketChat(self.user,
                                   self.password,
                                   server_url=self.url)
-        self.channel = 'hatchbuck'
-        self.alias = 'carddav2hatchbuck'
+        self.channel = os.environ.get('ROCKETCHAT_CHANNEL', 'hatchbuck')
+        self.alias = os.environ.get('ROCKETCHAT_ALIAS', 'carddav2hatchbuck')
 
     def send_message(self, message):
         """Send a message to the RocketChat channel"""

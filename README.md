@@ -15,7 +15,7 @@ Hatchbuck to match the one in the CardDAV address book.
 The `sync` command calls `carddavsync` using username and password from `.env`
 
 Usage
-=====
+-----
 
 See the help screen in the CLI, e.g.
 
@@ -23,5 +23,23 @@ See the help screen in the CLI, e.g.
 python -m carddav2hatchbuck.sync --help
 ```
 
-Required arguments can be provided as environment values, including writing
-them into an `.env` file, or explicitly passed (takes precedence).
+Required arguments can be provided as environment values, or explicitly passed
+(which takes precedence). Optionally, you can provide an `.env` file in the
+current directory, this is evaluated by carddav2hatchbuck.
+
+### Example `.env` file
+
+```ini
+# FILE: .env -- environment values
+VDIRSYNC_URL = https://example.com/dav/Contacts/personal/
+VDIRSYNC_USER = sync.system
+VDIRSYNC_PASS = a-very-secret-password
+HATCHBUCK_KEY = fa0VkS25ZS18xHMxUGM2M193TdWhiRTlz?JJZ0cndEFqY3Y4bS0kVXZnVzE1
+HATCHBUCK_SOURCE = cZTF1YBKR1NaZjJyTVpSXlERHRXlQYjSzE0Ka1BrTNnQ3?BWVRaaQVjVuLE9
+# optional notification (e.g. unresolvable duplicates)
+ROCKETCHAT_URL = https://rocket.chat
+ROCKETCHAT_USER = sync.system
+ROCKETCHAT_PASS = another-secret-password-you-bet
+ROCKETCHAT_CHANNEL = hatchbuck
+ROCKETCHAT_ALIAS = carddav2hatchbuck
+```
