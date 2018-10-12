@@ -2,7 +2,6 @@
 Notification to pro-actively features for un
 """
 import os
-import logging
 
 from rocketchat_API.rocketchat import RocketChat
 

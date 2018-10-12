@@ -52,15 +52,16 @@ class HatchbuckParser:
         """Start parsing files"""
         if self.args.file:
             for file in self.args.file:
-                self.log.debug("parsing file %s", (file))
+                self.log.debug("parsing file %s", file)
                 self.parse_file(file)
         elif self.args.dir:
             for direc in self.args.dir:
-                self.log.debug("using directory %s", (direc))
+                self.log.debug("using directory %s", direc)
                 for file in os.listdir(direc):
                     if file.endswith(".vcf"):
-                        self.log.debug("parsing file %s", (direc + file))
-                        self.parse_file(direc + file)
+                        file_path = os.path.join(direc, file)
+                        self.log.debug("parsing file %s", file_path)
+                        self.parse_file(file_path)
         else:
             print('Nothing to do.')
 
