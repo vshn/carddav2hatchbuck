@@ -487,7 +487,8 @@ class HatchbuckParser:
             if len(profile_contactids) > 1:
                 # there are duplicates
                 NotificationService().send_message(
-                    'Duplicates: %s' % message[:-2])
+                    'Duplicates: %s from file: %s' % (message[:-2], file)
+                )
 
 
 def main():
