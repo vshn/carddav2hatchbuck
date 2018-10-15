@@ -352,12 +352,16 @@ class HatchbuckParser:
                                 break
                         if redundant:
                             # delete this number
-                            profile = self.hatchbuck.update(
+                            newprofile = self.hatchbuck.update(
                                 profile['contactId'],
                                 {'phones': [
                                     {'number': '',
                                      'id': telefon['id'],
                                      'type': telefon['type'], }, ]})
+                            if newprofile is not None:
+                                # if the removal was successful continue working
+                                # with the new profile
+                                profile = newprofile
                         else:
                             # so this is an unique number but without country code
                             # try to guess the country from the postal addresses
