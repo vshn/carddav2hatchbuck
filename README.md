@@ -27,7 +27,7 @@ Required arguments can be provided as environment values, or explicitly passed
 (which takes precedence). Optionally, you can provide an `.env` file in the
 current directory, this is evaluated by carddav2hatchbuck.
 
-### Example `.env` file
+### Example `.env` file
 
 ```ini
 # FILE: .env -- environment values
