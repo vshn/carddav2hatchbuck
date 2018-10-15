@@ -8,7 +8,7 @@ import carddav2hatchbuck as package
 
 def read_file(filename):
     """Read the contents of a file"""
-    with open(filename, "r") as file:
+    with open(filename) as file:
         return file.read()
 
 
