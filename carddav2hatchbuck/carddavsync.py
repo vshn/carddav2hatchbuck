@@ -173,13 +173,13 @@ class HatchbuckParser:
                                                          content['n'][0].
                                                          value.family)
 
-                if 'title' in content and profile['title'] == '':
+                if 'title' in content and profile.get('title', '') == '':
                     profile = self.hatchbuck.profile_add(profile, 'title',
                                                          None,
                                                          content['title'][0].
                                                          value)
                 if 'company' in profile:
-                    if 'org' in content and profile['company'] == '':
+                    if 'org' in content and profile.get('company', '') == '':
                         profile = self.hatchbuck.profile_add(profile, 'company',
                                                              None,
                                                              content['org'][0].
