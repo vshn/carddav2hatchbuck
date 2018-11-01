@@ -7,13 +7,13 @@ import os
 import pprint
 import re
 import sys
+import binascii
 
 import phonenumbers
 import vobject
 
 from hatchbuck import Hatchbuck
 from pycountry import countries
-import binascii
 
 from .cli import parse_arguments
 from .logger import configure as configure_logging
@@ -64,8 +64,8 @@ class HatchbuckParser:
                         self.log.debug("parsing file %s", file_path)
                         try:
                             self.parse_file(file_path)
-                        except binascii.Error as exception:
-                            self.log.error("error parsing: %s", exeption)
+                        except binascii.Error as error:
+                            self.log.error("error parsing: %s", error)
         else:
             print('Nothing to do.')
 
