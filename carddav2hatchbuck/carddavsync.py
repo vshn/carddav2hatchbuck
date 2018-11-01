@@ -13,6 +13,7 @@ import vobject
 
 from hatchbuck import Hatchbuck
 from pycountry import countries
+import binascii
 
 from .cli import parse_arguments
 from .logger import configure as configure_logging
@@ -63,8 +64,8 @@ class HatchbuckParser:
                         self.log.debug("parsing file %s", file_path)
                         try:
                             self.parse_file(file_path)
-                        except Exception as e:
-                            self.log.error("error parsing: %s", e)
+                        except binascii.Error as exception:
+                            self.log.error("error parsing: %s", exeption)
         else:
             print('Nothing to do.')
 
