@@ -61,7 +61,10 @@ class HatchbuckParser:
                     if file.endswith(".vcf"):
                         file_path = os.path.join(direc, file)
                         self.log.debug("parsing file %s", file_path)
-                        self.parse_file(file_path)
+                        try:
+                            self.parse_file(file_path)
+                        except e:
+                            self.log.error("error parsing: %s", e)
         else:
             print('Nothing to do.')
 
