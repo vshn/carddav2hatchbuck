@@ -63,7 +63,7 @@ class HatchbuckParser:
                         self.log.debug("parsing file %s", file_path)
                         try:
                             self.parse_file(file_path)
-                        except e:
+                        except Exception as e:
                             self.log.error("error parsing: %s", e)
         else:
             print('Nothing to do.')
