@@ -1,8 +1,8 @@
 """
 Packaging setup for carddav2hatchbuck
 """
-from setuptools import find_packages, setup
 from os.path import abspath, dirname, join
+from setuptools import find_packages, setup
 
 import carddav2hatchbuck as package
 
@@ -10,8 +10,8 @@ import carddav2hatchbuck as package
 def read_file(filename):
     """Read the contents of a file"""
     here = abspath(dirname(__file__))
-    with open(join(here, filename), encoding="utf-8") as f:
-        return f.read()
+    with open(join(here, filename), encoding="utf-8") as file:
+        return file.read()
 
 
 setup(
