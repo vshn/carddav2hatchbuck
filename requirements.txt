@@ -7,7 +7,7 @@
 hatchbuck==1.0.7
 oauthlib==1.0.3           # via requests-oauthlib
 phonenumbers==8.9.7
-pycountry==18.5.26
+pycountry==18.12.8
 python-dotenv==0.9.1
 requests-oauthlib==0.6.1
 requests-toolbelt==0.6.0
