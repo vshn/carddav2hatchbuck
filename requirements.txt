@@ -15,6 +15,6 @@ requests==2.9.1
 rocketchat-api==0.6.22
 vobject==0.9.5
 vdirsyncer==0.10.0
-click==6.6
+click==6.7
 click-log==0.1.4
 click-threading==0.1.2
