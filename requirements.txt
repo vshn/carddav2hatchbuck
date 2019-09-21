@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 hatchbuck==1.0.7
-oauthlib==1.0.3           # via requests-oauthlib
+oauthlib==1.1.2           # via requests-oauthlib
 phonenumbers==8.9.7
 pycountry==18.5.26
 python-dotenv==0.9.1
