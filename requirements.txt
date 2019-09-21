@@ -17,4 +17,4 @@ vobject==0.9.5
 vdirsyncer==0.10.0
 click==6.6
 click-log==0.1.4
-click-threading==0.1.2
+click-threading==0.4.4
