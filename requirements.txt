@@ -9,7 +9,7 @@ oauthlib==1.0.3           # via requests-oauthlib
 phonenumbers==8.9.7
 pycountry==18.5.26
 python-dotenv==0.9.1
-requests-oauthlib==0.6.1
+requests-oauthlib==1.2.0
 requests-toolbelt==0.6.0
 requests==2.9.1
 rocketchat-api==0.6.22
