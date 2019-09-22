@@ -8,6 +8,7 @@ class HatchbuckArgsMock:  # pylint: disable=too-few-public-methods
     """
     Replacement for argparse command line arguments when used as module.
     """
+
     verbose = True
     update = True
     noop = True

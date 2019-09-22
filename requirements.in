@@ -1,7 +1,6 @@
-dotenv
 hatchbuck
-phonenumbers
 pycountry
-requests
-rocketchat-API
+phonenumbers
 vobject
+python-dotenv
+rocketchat-API
