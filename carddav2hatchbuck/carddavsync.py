@@ -223,10 +223,13 @@ class HatchbuckParser:
                     profile = self.hatchbuck.profile_add_address(profile, address, kind)
 
                 for telefon in content.get("tel", []):
+                    # number cleanup
                     number = telefon.value
                     for rep in "()-\xa0":
                         # clean up number
                         number = number.replace(rep, "")
+                    number = number.replace("+00", "+").replace("+0", "+")
+
                     try:
                         if "WORK" in telefon.type_paramlist:
                             kind = "Work"
@@ -241,17 +244,19 @@ class HatchbuckParser:
                     redundant = False
 
                     try:
-                        phonenumber = phonenumbers.parse(telefon.value, None)
+                        phonenumber = phonenumbers.parse(number, None)
                         pformatted = phonenumbers.format_number(
                             phonenumber, phonenumbers.PhoneNumberFormat.INTERNATIONAL
                         )
                     except phonenumbers.phonenumberutil.NumberParseException:
+                        # number could not be parsed, e.g. because it is a local number without country code
                         self.log.warning(
-                            "could not parse number %s in %s",
+                            "could not parse number %s as %s in %s, trying to guess country from address",
                             telefon.value,
+                            number,
                             self.short_contact(profile),
                         )
-                        pformatted = telefon.value
+                        pformatted = number
 
                         # try to guess the country from the addresses
                         countries_found = []
@@ -268,9 +273,7 @@ class HatchbuckParser:
                             countrycode = countries.lookup(countries_found[0]).alpha_2
                             self.log.debug("countrycode %s", countrycode)
                             try:
-                                phonenumber = phonenumbers.parse(
-                                    telefon.value, countrycode
-                                )
+                                phonenumber = phonenumbers.parse(number, countrycode)
                                 pformatted = phonenumbers.format_number(
                                     phonenumber,
                                     phonenumbers.PhoneNumberFormat.INTERNATIONAL,
@@ -287,25 +290,28 @@ class HatchbuckParser:
                                 continue
                             except phonenumbers.phonenumberutil.NumberParseException:
                                 self.log.warning(
-                                    "could not parse number %s in %s",
+                                    "could not parse number %s as %s using country %s in %s",
                                     telefon.value,
+                                    number,
+                                    countrycode,
                                     self.short_contact(profile),
                                 )
-                                pformatted = telefon.value
+                                pformatted = number
 
                         # check that there is not an international/longer
                         # number there already
                         # e.g. +41 76 4000 464 compared to 0764000464
 
                         # skip the 0 in front
-                        num = telefon.value.replace(" ", "")[1:]
+                        num = number.replace(" ", "")[1:]
                         for tel2 in profile["phones"]:
                             # check for suffix match
                             if tel2["number"].replace(" ", "").endswith(num):
                                 self.log.warning(
-                                    "not adding number %s in %s",
+                                    "not adding number %s from %s because it is a suffix of existing %s",
                                     num,
                                     self.short_contact(profile),
+                                    tel2["number"],
                                 )
                                 redundant = True
                                 break
@@ -325,7 +331,10 @@ class HatchbuckParser:
                         )
                         if telefon["number"] != pformatted:
                             self.log.warning(
-                                "number from %s to %s", telefon, pformatted
+                                "updating hatchbuck number from %s to %s for %s",
+                                telefon,
+                                pformatted,
+                                self.short_contact(profile),
                             )
                             profile = self.hatchbuck.profile_add(
                                 profile,
@@ -335,9 +344,9 @@ class HatchbuckParser:
                                 {"id": telefon["id"], "type": telefon["type"]},
                             )
 
-                    except phonenumbers.phonenumberutil.NumberParseException:
+                    except phonenumbers.phonenum    berutil.NumberParseException:
                         self.log.warning(
-                            "could not parse number %s in %s",
+                            "could not parse number %s in hatchbuck %s, checking if the same number is in contact already",
                             telefon["number"],
                             self.short_contact(profile),
                         )
@@ -348,8 +357,9 @@ class HatchbuckParser:
                                 " ", ""
                             ).endswith(num):
                                 self.log.warning(
-                                    "redundant number %s in %s",
+                                    "number %s is a suffix of %s in hatchbuck %s, removing",
                                     num,
+                                    tel2["number"],
                                     self.short_contact(profile),
                                 )
                                 redundant = True
@@ -414,10 +424,18 @@ class HatchbuckParser:
                                     continue
                                 except phonenumbers.phonenumberutil.NumberParseException:
                                     self.log.warning(
-                                        "could not parse number %s in %s",
+                                        "could not parse number %s in %s with country %s",
                                         telefon["number"],
                                         self.short_contact(profile),
+                                        countrycode,
                                     )
+                            else:
+                                self.log.warning(
+                                    "could not guess country for %s in %s because of countries in address: %s",
+                                    telefon["number"],
+                                    self.short_contact(profile),
+                                    countries_found,
+                                )
 
                 for email in content.get("x-skype", []):
                     profile = self.hatchbuck.profile_add(
