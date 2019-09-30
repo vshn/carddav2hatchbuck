@@ -391,7 +391,7 @@ class HatchbuckParser:
                                 self.log.debug("countrycode %s", countrycode)
                                 try:
                                     phonenumber = phonenumbers.parse(
-                                        telefon.value, countrycode
+                                        telefon["number"], countrycode
                                     )
                                     pformatted = phonenumbers.format_number(
                                         phonenumber,
