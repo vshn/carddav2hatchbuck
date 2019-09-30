@@ -415,7 +415,7 @@ class HatchbuckParser:
                                 except phonenumbers.phonenumberutil.NumberParseException:
                                     self.log.warning(
                                         "could not parse number %s in %s",
-                                        telefon.value,
+                                        telefon["number"],
                                         self.short_contact(profile),
                                     )
 
