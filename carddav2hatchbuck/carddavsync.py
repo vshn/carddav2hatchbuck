@@ -344,7 +344,7 @@ class HatchbuckParser:
                                 {"id": telefon["id"], "type": telefon["type"]},
                             )
 
-                    except phonenumbers.phonenum    berutil.NumberParseException:
+                    except phonenumbers.phonenumberutil.NumberParseException:
                         self.log.warning(
                             "could not parse number %s in hatchbuck %s, checking if the same number is in contact already",
                             telefon["number"],
@@ -353,7 +353,7 @@ class HatchbuckParser:
                         num = telefon["number"].replace(" ", "")[1:]
                         redundant = False
                         for tel2 in profile["phones"]:
-                            if tel2["id"] != telefon["id"] and tel2["number"].replace(
+                            if tel2.get("id", None) != telefon.get("id", None) and tel2.get("number", "").replace(
                                 " ", ""
                             ).endswith(num):
                                 self.log.warning(
