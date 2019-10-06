@@ -249,9 +249,11 @@ class HatchbuckParser:
                             phonenumber, phonenumbers.PhoneNumberFormat.INTERNATIONAL
                         )
                     except phonenumbers.phonenumberutil.NumberParseException:
-                        # number could not be parsed, e.g. because it is a local number without country code
+                        # number could not be parsed, e.g. because it is a
+                        # local number without country code
                         self.log.warning(
-                            "could not parse number %s as %s in %s, trying to guess country from address",
+                            "could not parse number %s as %s in %s, "
+                            "trying to guess country from address",
                             telefon.value,
                             number,
                             self.short_contact(profile),
@@ -308,7 +310,8 @@ class HatchbuckParser:
                             # check for suffix match
                             if tel2["number"].replace(" ", "").endswith(num):
                                 self.log.warning(
-                                    "not adding number %s from %s because it is a suffix of existing %s",
+                                    "not adding number %s from %s because it "
+                                    "is a suffix of existing %s",
                                     num,
                                     self.short_contact(profile),
                                     tel2["number"],
@@ -346,16 +349,17 @@ class HatchbuckParser:
 
                     except phonenumbers.phonenumberutil.NumberParseException:
                         self.log.warning(
-                            "could not parse number %s in hatchbuck %s, checking if the same number is in contact already",
+                            "could not parse number %s in hatchbuck %s, "
+                            "checking if the same number is in contact already",
                             telefon["number"],
                             self.short_contact(profile),
                         )
                         num = telefon["number"].replace(" ", "")[1:]
                         redundant = False
                         for tel2 in profile["phones"]:
-                            if tel2.get("id", None) != telefon.get("id", None) and tel2.get("number", "").replace(
-                                " ", ""
-                            ).endswith(num):
+                            if tel2.get("id", None) != telefon.get(
+                                "id", None
+                            ) and tel2.get("number", "").replace(" ", "").endswith(num):
                                 self.log.warning(
                                     "number %s is a suffix of %s in hatchbuck %s, removing",
                                     num,
@@ -431,7 +435,8 @@ class HatchbuckParser:
                                     )
                             else:
                                 self.log.warning(
-                                    "could not guess country for %s in %s because of countries in address: %s",
+                                    "could not guess country for %s in %s "
+                                    "because of countries in address: %s",
                                     telefon["number"],
                                     self.short_contact(profile),
                                     countries_found,
