@@ -1,8 +1,6 @@
 carddav2hatchbuck
 =================
-
-[![Build Status](https://img.shields.io/travis/vshn/carddav2hatchbuck/master.svg
-)](https://travis-ci.org/vshn/carddav2hatchbuck)
+[![Build Status](https://travis-ci.com/vshn/carddav2hatchbuck.svg?branch=master)](https://travis-ci.com/vshn/carddav2hatchbuck)
 
 A CLI tool to sync contacts from a CardDAV address book to Hatchbuck.
 
