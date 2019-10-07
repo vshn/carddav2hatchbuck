@@ -12,6 +12,8 @@ import pathlib
 import subprocess
 import time
 
+import sentry_sdk
+
 from .carddavsync import HatchbuckParser
 from .cli import parse_arguments
 
@@ -76,6 +78,7 @@ def run():
     """Main entry point"""
     args = parse_arguments()
     args.update = True
+    sentry_sdk.init()
     run_carddav_sync(args)
 
 

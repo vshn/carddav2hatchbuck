@@ -5,3 +5,5 @@ vobject
 python-dotenv
 rocketchat-API
 vdirsyncer
+sentry-sdk
+
