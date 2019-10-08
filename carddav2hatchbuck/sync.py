@@ -6,6 +6,7 @@ with hatchbuck CRM
 Reads the CardDAV login credentials from environment variables
 VDIRSYNC_USER and VDIRSYNC_PASS
 """
+import logging
 import os
 import os.path
 import pathlib
@@ -21,7 +22,7 @@ from .cli import parse_arguments
 def run_carddav_sync(args):
     """Fetch contacts from CardDAV source and sync with Hatchbuck"""
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    print("Starting carddav sync at %s ..." % now)
+    logging.info("Starting carddav sync at %s ...", now)
 
     carddav_dir = pathlib.Path("carddav")
     carddav_dir.mkdir(parents=True, exist_ok=True)
@@ -56,7 +57,7 @@ def run_carddav_sync(args):
 
     os.remove(sync_config)
 
-    print("CardDAV sync done, starting carddavsync")
+    logging.info("CardDAV sync done, starting carddavsync")
 
     files_list = os.listdir(carddav_dir.name)
 
@@ -70,7 +71,9 @@ def run_carddav_sync(args):
             parser = HatchbuckParser(args)
             parser.main()
         else:
-            print("File naming scheme not compatible." " Skipping: %s" % file_detail)
+            logging.info(
+                "File naming scheme not compatible." " Skipping: %s", file_detail
+            )
             continue
 
 

@@ -39,7 +39,7 @@ class HatchbuckParser:
 
     def show_summary(self):
         """Show some statistics"""
-        print(self.stats)
+        self.log.info(self.stats)
 
     def init_hatchbuck(self):
         """Initialize hatchbuck API incl. authentication"""
@@ -67,7 +67,7 @@ class HatchbuckParser:
                         except binascii.Error as error:
                             self.log.error("error parsing: %s", error)
         else:
-            print("Nothing to do.")
+            self.log.info("Nothing to do.")
 
     @staticmethod
     def short_contact(profile):
@@ -96,6 +96,7 @@ class HatchbuckParser:
         for vob in vobject.readComponents(open(file)):
             content = vob.contents
             if self.args.verbose:
+                self.log.debug("parsing %s:", file)
                 prin.pprint(content)
 
             if "n" not in content:
