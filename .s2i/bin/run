@@ -1,3 +1,5 @@
 #!/bin/bash
+date
 python3 -m carddav2hatchbuck.sync
-sleep 3600
+date
+sleep 600
