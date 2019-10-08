@@ -11,7 +11,7 @@ def parse_arguments():
     """
     Parse arguments from command line
     """
-    load_dotenv(verbose=True)
+    load_dotenv()
 
     key = os.environ.get("HATCHBUCK_KEY")
     source = os.environ.get("HATCHBUCK_SOURCE")

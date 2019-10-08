@@ -22,7 +22,7 @@ from .cli import parse_arguments
 def run_carddav_sync(args):
     """Fetch contacts from CardDAV source and sync with Hatchbuck"""
     now = time.strftime("%Y-%m-%d %H:%M:%S")
-    logging.info("Starting carddav sync at %s ...", now)
+    logging.info("Starting carddav sync at %s with arguments: %s", now, args)
 
     carddav_dir = pathlib.Path("carddav")
     carddav_dir.mkdir(parents=True, exist_ok=True)
@@ -82,6 +82,18 @@ def run():
     args = parse_arguments()
     args.update = True
     sentry_sdk.init()
+    logformat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    log = logging.getLogger()
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG, format=logformat)
+        log.setLevel(logging.DEBUG)
+    else:
+        print("nonverbose")
+        logging.basicConfig(level=logging.INFO, format=logformat)
+        log.setLevel(logging.INFO)
+        logging.getLogger("requests.packages.urllib3.connectionpool").setLevel(
+            logging.WARNING
+        )
     run_carddav_sync(args)
 
 

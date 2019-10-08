@@ -2,21 +2,19 @@
 """
 Hatchbuck parser. Run from command line or import as module.
 """
+import binascii
 import logging
 import os
 import pprint
 import re
 import sys
-import binascii
 
 import phonenumbers
 import vobject
-
 from hatchbuck import Hatchbuck
 from pycountry import countries
 
 from .cli import parse_arguments
-from .logger import configure as configure_logging
 from .notifications import NotificationService
 
 
@@ -29,17 +27,16 @@ class HatchbuckParser:
         self.args = args
         self.stats = {}
         self.hatchbuck = None
-        self.log = configure_logging(self.args.verbose)
 
     def main(self):
         """Parsing gets kicked off here"""
-        self.log.debug("starting with arguments: %s", self.args)
+        logging.debug("starting with arguments: %s", self.args)
         self.init_hatchbuck()
         self.parse_files()
 
     def show_summary(self):
         """Show some statistics"""
-        self.log.info(self.stats)
+        logging.info(self.stats)
 
     def init_hatchbuck(self):
         """Initialize hatchbuck API incl. authentication"""
@@ -53,21 +50,21 @@ class HatchbuckParser:
         """Start parsing files"""
         if self.args.file:
             for file in self.args.file:
-                self.log.debug("parsing file %s", file)
+                logging.debug("parsing file %s", file)
                 self.parse_file(file)
         elif self.args.dir:
             for direc in self.args.dir:
-                self.log.debug("using directory %s", direc)
+                logging.debug("using directory %s", direc)
                 for file in os.listdir(direc):
                     if file.endswith(".vcf"):
                         file_path = os.path.join(direc, file)
-                        self.log.debug("parsing file %s", file_path)
+                        logging.info("parsing file %s", file_path)
                         try:
                             self.parse_file(file_path)
                         except binascii.Error as error:
-                            self.log.error("error parsing: %s", error)
+                            logging.error("error parsing: %s", error)
         else:
-            self.log.info("Nothing to do.")
+            logging.info("Nothing to do.")
 
     @staticmethod
     def short_contact(profile):
@@ -96,7 +93,7 @@ class HatchbuckParser:
         for vob in vobject.readComponents(open(file)):
             content = vob.contents
             if self.args.verbose:
-                self.log.debug("parsing %s:", file)
+                logging.debug("parsing %s:", file)
                 prin.pprint(content)
 
             if "n" not in content:
@@ -162,7 +159,7 @@ class HatchbuckParser:
                     profile["emails"].append({"address": email.value, "type": kind})
 
                 profile = self.hatchbuck.create(profile)
-                self.log.info("added contact: %s", profile)
+                logging.info("added contact: %s", profile)
 
             for profile in profile_list:
                 if profile["firstName"] == "":
@@ -188,18 +185,18 @@ class HatchbuckParser:
                         # empty company name ->
                         # maybe we can guess the company name from the email
                         # address?
-                        # self.log.warning("empty company with emails: %s",
+                        # logging.warning("empty company with emails: %s",
                         #                  profile['emails'])
                         pass
 
                     # clean up company name
                     if re.match(r";$", profile["company"]):
-                        self.log.warning(
+                        logging.warning(
                             "found unclean company name: %s", profile["company"]
                         )
 
                     if re.match(r"\|", profile["company"]):
-                        self.log.warning(
+                        logging.warning(
                             "found unclean company name: %s", profile["company"]
                         )
 
@@ -220,7 +217,7 @@ class HatchbuckParser:
                     except AttributeError:
                         # if there is no type at all
                         kind = "Other"
-                    self.log.debug("adding address %s %s", address, profile)
+                    logging.debug("adding address %s %s", address, profile)
                     profile = self.hatchbuck.profile_add_address(profile, address, kind)
 
                 for telefon in content.get("tel", []):
@@ -252,7 +249,7 @@ class HatchbuckParser:
                     except phonenumbers.phonenumberutil.NumberParseException:
                         # number could not be parsed, e.g. because it is a
                         # local number without country code
-                        self.log.warning(
+                        logging.warning(
                             "could not parse number %s as %s in %s, "
                             "trying to guess country from address",
                             telefon.value,
@@ -269,19 +266,19 @@ class HatchbuckParser:
                                 and addr["country"] not in countries_found
                             ):
                                 countries_found.append(addr["country"])
-                        self.log.debug("countries found %s", countries_found)
+                        logging.debug("countries found %s", countries_found)
 
                         if len(countries_found) == 1:
                             # lets try to parse the number with the country
                             countrycode = countries.lookup(countries_found[0]).alpha_2
-                            self.log.debug("countrycode %s", countrycode)
+                            logging.debug("countrycode %s", countrycode)
                             try:
                                 phonenumber = phonenumbers.parse(number, countrycode)
                                 pformatted = phonenumbers.format_number(
                                     phonenumber,
                                     phonenumbers.PhoneNumberFormat.INTERNATIONAL,
                                 )
-                                self.log.debug("guess %s", pformatted)
+                                logging.debug("guess %s", pformatted)
                                 profile = self.hatchbuck.profile_add(
                                     profile,
                                     "phones",
@@ -292,7 +289,7 @@ class HatchbuckParser:
                                 # if we got here we now have a full number
                                 continue
                             except phonenumbers.phonenumberutil.NumberParseException:
-                                self.log.warning(
+                                logging.warning(
                                     "could not parse number %s as %s using country %s in %s",
                                     telefon.value,
                                     number,
@@ -310,7 +307,7 @@ class HatchbuckParser:
                         for tel2 in profile["phones"]:
                             # check for suffix match
                             if tel2["number"].replace(" ", "").endswith(num):
-                                self.log.warning(
+                                logging.warning(
                                     "not adding number %s from %s because it "
                                     "is a suffix of existing %s",
                                     num,
@@ -334,7 +331,7 @@ class HatchbuckParser:
                             phonenumber, phonenumbers.PhoneNumberFormat.INTERNATIONAL
                         )
                         if telefon["number"] != pformatted:
-                            self.log.warning(
+                            logging.warning(
                                 "updating hatchbuck number from %s to %s for %s",
                                 telefon,
                                 pformatted,
@@ -349,7 +346,7 @@ class HatchbuckParser:
                             )
 
                     except phonenumbers.phonenumberutil.NumberParseException:
-                        self.log.warning(
+                        logging.warning(
                             "could not parse number %s in hatchbuck %s, "
                             "checking if the same number is in contact already",
                             telefon["number"],
@@ -361,7 +358,7 @@ class HatchbuckParser:
                             if tel2.get("id", None) != telefon.get(
                                 "id", None
                             ) and tel2.get("number", "").replace(" ", "").endswith(num):
-                                self.log.warning(
+                                logging.warning(
                                     "number %s is a suffix of %s in hatchbuck %s, removing",
                                     num,
                                     tel2["number"],
@@ -397,13 +394,13 @@ class HatchbuckParser:
                                     and addr["country"] not in countries_found
                                 ):
                                     countries_found.append(addr["country"])
-                            self.log.debug("countries found %s", countries_found)
+                            logging.debug("countries found %s", countries_found)
                             if len(countries_found) == 1:
                                 # lets try to parse the number with the country
                                 countrycode = countries.lookup(
                                     countries_found[0]
                                 ).alpha_2
-                                self.log.debug("countrycode %s", countrycode)
+                                logging.debug("countrycode %s", countrycode)
                                 try:
                                     phonenumber = phonenumbers.parse(
                                         telefon["number"], countrycode
@@ -412,7 +409,7 @@ class HatchbuckParser:
                                         phonenumber,
                                         phonenumbers.PhoneNumberFormat.INTERNATIONAL,
                                     )
-                                    self.log.debug("guess %s", pformatted)
+                                    logging.debug("guess %s", pformatted)
                                     profile = self.hatchbuck.update(
                                         profile["contactId"],
                                         {
@@ -428,14 +425,14 @@ class HatchbuckParser:
                                     # if we got here we now have a full number
                                     continue
                                 except phonenumbers.phonenumberutil.NumberParseException:
-                                    self.log.warning(
+                                    logging.warning(
                                         "could not parse number %s in %s with country %s",
                                         telefon["number"],
                                         self.short_contact(profile),
                                         countrycode,
                                     )
                             else:
-                                self.log.warning(
+                                logging.warning(
                                     "could not guess country for %s in %s "
                                     "because of countries in address: %s",
                                     telefon["number"],
@@ -557,7 +554,6 @@ class HatchbuckParser:
 def main():
     """Script execution starts here."""
     args = parse_arguments()
-
     parser = HatchbuckParser(args)
     parser.main()
     parser.show_summary()
