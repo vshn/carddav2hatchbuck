@@ -81,7 +81,7 @@ def run():
     """Main entry point"""
     args = parse_arguments()
     args.update = True
-    sentry_sdk.init()
+    sentry_sdk.init(release=os.environ.get("OPENSHIFT_BUILD_NAME"))
     logformat = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     log = logging.getLogger()
     if args.verbose:
