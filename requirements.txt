@@ -10,7 +10,7 @@ chardet==3.0.4            # via requests
 click-log==0.3.2          # via vdirsyncer
 click-threading==0.4.4    # via vdirsyncer
 click==7.0                # via click-log, click-threading, vdirsyncer
-hatchbuck==1.0.20
+hatchbuck==1.0.22
 idna==2.8                 # via requests
 phonenumbers==8.10.20
 pycountry==19.8.18
