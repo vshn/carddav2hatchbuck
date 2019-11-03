@@ -14,7 +14,7 @@ hatchbuck==1.0.20
 idna==2.8                 # via requests
 phonenumbers==8.10.20
 pycountry==19.8.18
-python-dateutil==2.8.0    # via vobject
+python-dateutil==2.8.1    # via vobject
 python-dotenv==0.10.3
 requests-toolbelt==0.9.1  # via vdirsyncer
 requests==2.22.0          # via hatchbuck, requests-toolbelt, rocketchat-api, vdirsyncer
