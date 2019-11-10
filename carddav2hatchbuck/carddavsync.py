@@ -66,20 +66,6 @@ class HatchbuckParser:
         else:
             logging.info("Nothing to do.")
 
-    @staticmethod
-    def short_contact(profile):
-        """
-        Return a short version of an contact
-        """
-        text = ""
-
-        if profile.get("firstName", False) and profile.get("lastName", False):
-            text += "%s %s, " % (profile["firstName"], profile["lastName"])
-        for email in profile.get("emails", []):
-            text += "%s, " % email["address"]
-
-        return "Contact(%s)" % text[:-2]
-
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-statements
@@ -254,7 +240,7 @@ class HatchbuckParser:
                             "trying to guess country from address",
                             telefon.value,
                             number,
-                            self.short_contact(profile),
+                            self.hatchbuck.short_contact(profile),
                         )
                         pformatted = number
 
@@ -294,7 +280,7 @@ class HatchbuckParser:
                                     telefon.value,
                                     number,
                                     countrycode,
-                                    self.short_contact(profile),
+                                    self.hatchbuck.short_contact(profile),
                                 )
                                 pformatted = number
 
@@ -311,7 +297,7 @@ class HatchbuckParser:
                                     "not adding number %s from %s because it "
                                     "is a suffix of existing %s",
                                     num,
-                                    self.short_contact(profile),
+                                    self.hatchbuck.short_contact(profile),
                                     tel2["number"],
                                 )
                                 redundant = True
@@ -335,7 +321,7 @@ class HatchbuckParser:
                                 "updating hatchbuck number from %s to %s for %s",
                                 telefon,
                                 pformatted,
-                                self.short_contact(profile),
+                                self.hatchbuck.short_contact(profile),
                             )
                             profile = self.hatchbuck.profile_add(
                                 profile,
@@ -350,7 +336,7 @@ class HatchbuckParser:
                             "could not parse number %s in hatchbuck %s, "
                             "checking if the same number is in contact already",
                             telefon["number"],
-                            self.short_contact(profile),
+                            self.hatchbuck.short_contact(profile),
                         )
                         num = telefon["number"].replace(" ", "")[1:]
                         redundant = False
@@ -362,7 +348,7 @@ class HatchbuckParser:
                                     "number %s is a suffix of %s in hatchbuck %s, removing",
                                     num,
                                     tel2["number"],
-                                    self.short_contact(profile),
+                                    self.hatchbuck.short_contact(profile),
                                 )
                                 redundant = True
                                 break
@@ -428,7 +414,7 @@ class HatchbuckParser:
                                     logging.warning(
                                         "could not parse number %s in %s with country %s",
                                         telefon["number"],
-                                        self.short_contact(profile),
+                                        self.hatchbuck.short_contact(profile),
                                         countrycode,
                                     )
                             else:
@@ -436,7 +422,7 @@ class HatchbuckParser:
                                     "could not guess country for %s in %s "
                                     "because of countries in address: %s",
                                     telefon["number"],
-                                    self.short_contact(profile),
+                                    self.hatchbuck.short_contact(profile),
                                     countries_found,
                                 )
 
