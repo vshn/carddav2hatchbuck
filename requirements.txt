@@ -18,7 +18,7 @@ python-dateutil==2.8.1    # via vobject
 python-dotenv==0.10.3
 requests-toolbelt==0.9.1  # via vdirsyncer
 requests==2.22.0          # via hatchbuck, requests-toolbelt, rocketchat-api, vdirsyncer
-rocketchat-api==0.6.35
+rocketchat-api==0.6.36
 sentry-sdk==0.13.2
 six==1.13.0               # via python-dateutil
 urllib3==1.25.6           # via requests, sentry-sdk
