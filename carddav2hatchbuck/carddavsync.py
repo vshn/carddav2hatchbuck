@@ -148,12 +148,12 @@ class HatchbuckParser:
                 logging.info("added contact: %s", profile)
 
             for profile in profile_list:
-                if profile["firstName"] == "":
+                if profile["firstName"] == "" or "@" in profile["firstName"]:
                     profile = self.hatchbuck.profile_add(
                         profile, "firstName", None, content["n"][0].value.given
                     )
 
-                if profile["lastName"] == "":
+                if profile["lastName"] == "" or "@" in profile["lastName"]:
                     profile = self.hatchbuck.profile_add(
                         profile, "lastName", None, content["n"][0].value.family
                     )
