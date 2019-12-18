@@ -307,165 +307,47 @@ class HatchbuckParser:
                             profile = self.hatchbuck.profile_add(
                                 profile, "phones", "number", pformatted, {"type": kind}
                             )
+                # clean & deduplicate all phone numbers
+                profile = self.hatchbuck.clean_all_phone_numbers(profile)
 
-                for telefon in profile.get("phones", []):
-                    # now go through all phone numbers in hatchbuck
-                    #  to clean them up
-                    try:
-                        phonenumber = phonenumbers.parse(telefon["number"], None)
-                        pformatted = phonenumbers.format_number(
-                            phonenumber, phonenumbers.PhoneNumberFormat.INTERNATIONAL
-                        )
-                        if telefon["number"] != pformatted:
-                            logging.warning(
-                                "updating hatchbuck number from %s to %s for %s",
-                                telefon,
-                                pformatted,
-                                self.hatchbuck.short_contact(profile),
-                            )
-                            profile = self.hatchbuck.profile_add(
-                                profile,
-                                "phones",
-                                "number",
-                                pformatted,
-                                {"id": telefon["id"], "type": telefon["type"]},
-                            )
-
-                    except phonenumbers.phonenumberutil.NumberParseException:
-                        logging.warning(
-                            "could not parse number %s in hatchbuck %s, "
-                            "checking if the same number is in contact already",
-                            telefon["number"],
-                            self.hatchbuck.short_contact(profile),
-                        )
-                        num = telefon["number"].replace(" ", "")[1:]
-                        redundant = False
-                        for tel2 in profile["phones"]:
-                            if tel2.get("id", None) != telefon.get(
-                                "id", None
-                            ) and tel2.get("number", "").replace(" ", "").endswith(num):
-                                logging.warning(
-                                    "number %s is a suffix of %s in hatchbuck %s, removing",
-                                    num,
-                                    tel2["number"],
-                                    self.hatchbuck.short_contact(profile),
-                                )
-                                redundant = True
-                                break
-                        if redundant:
-                            # delete this number
-                            newprofile = self.hatchbuck.update(
-                                profile["contactId"],
-                                {
-                                    "phones": [
-                                        {
-                                            "number": "",
-                                            "id": telefon["id"],
-                                            "type": telefon["type"],
-                                        }
-                                    ]
-                                },
-                            )
-                            if newprofile is not None:
-                                # if the removal was successful continue working
-                                # with the new profile
-                                profile = newprofile
-                        else:
-                            # so this is an unique number but without country code
-                            # try to guess the country from the postal addresses
-                            countries_found = []
-                            for addr in profile.get("addresses", []):
-                                if (
-                                    addr.get("country", False)
-                                    and addr["country"] not in countries_found
-                                ):
-                                    countries_found.append(addr["country"])
-                            logging.debug("countries found %s", countries_found)
-                            if len(countries_found) == 1:
-                                # lets try to parse the number with the country
-                                countrycode = countries.lookup(
-                                    countries_found[0]
-                                ).alpha_2
-                                logging.debug("countrycode %s", countrycode)
-                                try:
-                                    phonenumber = phonenumbers.parse(
-                                        telefon["number"], countrycode
-                                    )
-                                    pformatted = phonenumbers.format_number(
-                                        phonenumber,
-                                        phonenumbers.PhoneNumberFormat.INTERNATIONAL,
-                                    )
-                                    logging.debug("guess %s", pformatted)
-                                    profile = self.hatchbuck.update(
-                                        profile["contactId"],
-                                        {
-                                            "phones": [
-                                                {
-                                                    "number": pformatted,
-                                                    "id": telefon["id"],
-                                                    "type": telefon["type"],
-                                                }
-                                            ]
-                                        },
-                                    )
-                                    # if we got here we now have a full number
-                                    continue
-                                except phonenumbers.phonenumberutil.NumberParseException:
-                                    logging.warning(
-                                        "could not parse number %s in %s with country %s",
-                                        telefon["number"],
-                                        self.hatchbuck.short_contact(profile),
-                                        countrycode,
-                                    )
-                            else:
-                                logging.warning(
-                                    "could not guess country for %s in %s "
-                                    "because of countries in address: %s",
-                                    telefon["number"],
-                                    self.hatchbuck.short_contact(profile),
-                                    countries_found,
-                                )
-
-                for email in content.get("x-skype", []):
+                for skype in content.get("x-skype", []):
                     profile = self.hatchbuck.profile_add(
                         profile,
                         "instantMessaging",
                         "address",
-                        email.value,
+                        skype.value,
                         {"type": "Skype"},
                     )
 
-                for email in content.get("x-msn", []):
+                for msn in content.get("x-msn", []):
                     profile = self.hatchbuck.profile_add(
                         profile,
                         "instantMessaging",
                         "address",
-                        email.value,
+                        msn.value,
                         {"type": "Messenger"},
                     )
 
-                for email in content.get("x-msnim", []):
+                for msn in content.get("x-msnim", []):
                     profile = self.hatchbuck.profile_add(
                         profile,
                         "instantMessaging",
                         "address",
-                        email.value,
+                        msn.value,
                         {"type": "Messenger"},
                     )
 
-                for email in content.get("x-twitter", []):
-                    if "twitter.com" in email.value:
-                        value = email.value
+                for twitter in content.get("x-twitter", []):
+                    if "twitter.com" in twitter.value:
+                        value = twitter.value
                     else:
-                        value = "http://twitter.com/" + email.value.replace("@", "")
+                        value = "http://twitter.com/" + twitter.value.replace("@", "")
                     profile = self.hatchbuck.profile_add(
                         profile, "socialNetworks", "address", value, {"type": "Twitter"}
                     )
 
-                for email in content.get("url", []) + content.get(
-                    "x-socialprofile", []
-                ):
-                    value = email.value
+                for url in content.get("url", []) + content.get("x-socialprofile", []):
+                    value = url.value
                     if not value.startswith("http"):
                         value = "http://" + value
                     if "facebook.com" in value:
@@ -489,11 +371,11 @@ class HatchbuckParser:
                             profile, "website", "websiteUrl", value
                         )
 
-                for email in content.get("bday", []):
+                for bday in content.get("bday", []):
                     date = {
-                        "year": email.value[0:4],
-                        "month": email.value[5:7],
-                        "day": email.value[8:10],
+                        "year": bday.value[0:4],
+                        "month": bday.value[5:7],
+                        "day": bday.value[8:10],
                     }
                     profile = self.hatchbuck.profile_add_birthday(profile, date)
 
