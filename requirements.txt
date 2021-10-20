@@ -22,5 +22,5 @@ rocketchat-api==0.6.36
 sentry-sdk==0.13.5
 six==1.13.0               # via python-dateutil
 urllib3==1.25.7           # via requests, sentry-sdk
-vdirsyncer==0.16.7
+vdirsyncer==0.18.0
 vobject==0.9.6.1
