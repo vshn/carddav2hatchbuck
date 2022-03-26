@@ -12,7 +12,7 @@ click-threading==0.4.4    # via vdirsyncer
 click==7.0                # via click-log, click-threading, vdirsyncer
 hatchbuck==1.0.23
 idna==2.8                 # via requests
-phonenumbers==8.11.1
+phonenumbers==8.12.45
 pycountry==19.8.18
 python-dateutil==2.8.1    # via vobject
 python-dotenv==0.10.3
